@@ -16,17 +16,21 @@
 
 #include <iostream>
 #include <fstream>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string>
 #include <math.h>
 #include <vector>
 #include <complex>
+#include <sstream>
 
 #define debug 0
 #define verbose 1
 #define PI 3.14159265358979
 #define TWOPI 6.28318530717959
 
+using namespace std;
+/*
 using std::cin;
 using std::cout;
 using std::cerr;
@@ -34,7 +38,7 @@ using std::ifstream;
 using std::ofstream;
 using std::string;
 using std::vector;
-using std::complex;
+using std::complex; */
 
 #include "polynomial.cc"
 #include "rational_map.cc"
@@ -83,9 +87,10 @@ int main(int argc, char *argv[]){
 	R.ZP_index=0;
 	
 	setup_graphics();
+	setup_font();
 	finished=false;
-	cout << "Zeros are red, Poles are green. \n";
-	cout << "Critical points are green, critical values (on RHS) are purple.\n";
+	cout << "Zeros are red, Poles are blue. \n";
+	cout << "Critical points are green, critical values (on RHS) are light blue.\n";
 	cout << "Select a zero or pole with mouse button. \n";
 	cout << "Adjust its values with arrow keys. \n";
 	cout << "To output data to screen, type [o]. \n";

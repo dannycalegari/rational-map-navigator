@@ -52,7 +52,7 @@ void rational_map::select_ZP(complex<double> z){	// finds zero or pole closest t
 	complex<double> w;
 	double dist;
 	int i;
-	cout << "finding closest zero/pole to " << z.real() << " + " << z.imag() << " i\n";
+//	cout << "finding closest zero/pole to " << z.real() << " + " << z.imag() << " i\n";
 	ZP='Z';
 	ZP_index=0;
 	dist=norm(z-Zeros[0]);

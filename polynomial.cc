@@ -233,8 +233,8 @@ complex<double> stereo_point(complex<double> z){
 	complex<double> w;
 	double d;
 	d=abs(z);
-	w.real()=z.real()*2.0/(1.0+d);
-	w.imag()=z.imag()*2.0/(1.0+d);
+	w.real()=z.real()*3.0/(1.0+d);
+	w.imag()=z.imag()*3.0/(1.0+d);
 	return(w);
 };
 
@@ -242,7 +242,7 @@ complex<double> inverse_stereo(complex<double> z){
 	complex<double> w;
 	double d;
 	d=abs(z);
-	w.real()=z.real()/(2.0-d);
-	w.imag()=z.imag()/(2.0-d);
+	w.real()=z.real()/(3.0-d);
+	w.imag()=z.imag()/(3.0-d);
 	return(w);
 };

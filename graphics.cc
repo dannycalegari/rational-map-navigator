@@ -23,6 +23,7 @@ GC gc;
 Window win;
 int border_width = 4;
 unsigned int width, height;
+XFontStruct * font;
 
 void setup_graphics(void){
 	display=XOpenDisplay(NULL);
@@ -39,6 +40,17 @@ void setup_graphics(void){
 	XSetBackground(display, gc, WhitePixel(display, screen_num));
   
 	XMapWindow(display, win);
+}
+
+void setup_font(void){
+    const char * fontname = "-*-times-*-r-*-*-14-*-*-*-*-*-*-*";
+    font = XLoadQueryFont (display, fontname);
+    /* If the font could not be loaded, revert to the "fixed" font. */
+    if (! font) {
+        font = XLoadQueryFont (display, "fixed");
+        cout << "couldn't find font!\n";
+    }
+    XSetFont (display, gc, font->fid);
 }
 
 
@@ -91,6 +103,9 @@ void draw_faint_circle(int x, int y, int r){
 void rational_map::draw_PZCV(){	// graphical output routine
 	int i;
 	point p;
+	stringstream T;
+	string S;
+	complex<double> z;
 	draw_line(640,0,640,640);
 	draw_line(0,640,1280,640);
 	draw_faint_line(310,320,330,320);
@@ -123,6 +138,18 @@ void rational_map::draw_PZCV(){	// graphical output routine
 		p.x=p.x+640;
 		draw_circle(p.x,p.y,1,(long) 0x3377AA);
 	};
+	if(ZP=='Z'){
+		S="Current selected point is a zero, located at ";
+		z=Zeros[ZP_index];
+	} else if(ZP=='P') {
+		S="Current selected point is a pole, located at ";
+		z=Poles[ZP_index];
+	};
+	T << z.real() << " + " << z.imag() << " i";
+	S=S+T.str();
+//	cout << S;
+    XSetForeground(display, gc, (long) 0x000000);
+	XDrawString(display,win, gc,20,665,S.c_str(),strlen(S.c_str()));
 };
 
 point mouse_location(){
@@ -151,6 +178,7 @@ void graphics_routine(rational_map &R, bool &finished){
 		
 	erase_field();
 	R.draw_PZCV();
+
 	XFlush(display);
 	XNextEvent(display, &report);
 	switch (report.type) {
@@ -158,7 +186,6 @@ void graphics_routine(rational_map &R, bool &finished){
 			p=mouse_location();
 			z=point_to_complex(p);
 			R.select_ZP(inverse_stereo(z));
-			break;
 		case KeyPress:
 			if(XLookupKeysym(&report.xkey, 0) == XK_Right){		// adjust Z or P
 				z.real()=0.02;
