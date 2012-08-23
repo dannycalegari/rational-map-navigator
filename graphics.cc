@@ -113,7 +113,7 @@ void rational_map::draw_PZCV(){	// graphical output routine
 	draw_faint_line(970,320,990,320);
 	draw_faint_line(980,330,980,310);
 	draw_faint_circle(320,320,300);
-	draw_faint_circle(980,320,300);
+	draw_faint_circle(960,320,300);
 	for(i=0;i<Zeros.size();i++){
 		p=complex_to_point(stereo_point(Zeros[i]));
 		draw_circle(p.x,p.y,1,(long) 0xFF0000);
@@ -174,7 +174,6 @@ void graphics_routine(rational_map &R, bool &finished){
 	// function inverse_stereo takes disk of radius 2 to complex plane
 	complex<double> z;
 	point p;
-	bool result;
 		
 	erase_field();
 	R.draw_PZCV();
