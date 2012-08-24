@@ -189,9 +189,9 @@ void rational_map::draw_PZCV(){	// graphical output routine
 			break;
 		case 'S':
 			if(integral_curves){
-				draw_integral_curves(Sch(), 0xBBCCDD); // draw nonlinearity
+				draw_integral_curves(Sch(), 0xBBCCDD); // draw Schwarzian
 			} else {
-				draw_vector_field(Sch(), 0x99AABB); // draw nonlinearity
+				draw_vector_field(Sch(), 0x99AABB); // draw Schwarzian
 			};
 		case 'X':
 			break;
