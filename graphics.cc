@@ -136,21 +136,24 @@ void draw_vector_field(rational_map R, long col){
 void draw_integral_curves(rational_map R, long col){
 	int x, y;
 	point p,q;
-	complex<double> z,w;
+	complex<double> z,w,zz;
 	int i;
 	for(x=0;x<600;x=x+10){
 		for(y=0;y<600;y=y+10){
 			p.x=x;
 			p.y=y;
 			z=point_to_complex(p);
-			if(abs(z)<2.95){
+			if(abs(z)<3.0){
 				z=inverse_stereo(z);	// OK, got initial, viable point
-				for(i=0;i<1000;i++){
+				for(i=0;i<100;i++){
 					w=R.EVAL(z);
-					z=z+w/(1.0+abs(w)*1000.0);	// step size too small?
+					z=z+w/(1.0+abs(w)*100.0);	// step size too small?
 		//			cout << z.real() << " + " << z.imag() << "\n";
-					q=complex_to_point(stereo_point(z));
+					zz=stereo_point(z);
+					if(abs(zz)<3.0){
+						q=complex_to_point(stereo_point(z));
 						draw_thin_line(p.x,p.y,q.x,q.y, col);
+					};
 					p=q;
 				};
 			};
