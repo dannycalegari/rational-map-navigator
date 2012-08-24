@@ -87,6 +87,7 @@ int main(int argc, char *argv[]){
 	R.ZP_index=0;
 	
 	R.VF='X';	// initialize don't draw vector field
+	R.integral_curves=false;
 	
 	setup_graphics();
 	setup_font();
@@ -97,6 +98,7 @@ int main(int argc, char *argv[]){
 	cout << "Adjust its values with arrow keys. \n";
 	cout << "To output data to screen, type [o]. \n";
 	cout << "To toggle vector field D/N/S/none, type [v]. \n";
+	cout << "To toggle integral curves on/off, type [i] (warning: very slow!) \n";
 	cout << "To quit, type [q]. \n";
 	
 	while(finished==false){

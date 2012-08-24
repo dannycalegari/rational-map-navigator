@@ -11,7 +11,8 @@ class rational_map{
 		char ZP;		// is 'Z' for zero or 'P' for pole
 		int ZP_index;	// index of ZP
 		char VF;		// is 'D' for derivative, 'N' for nonlinearity, 'S' for Schwarzian, and 'X' for none
-				
+		bool integral_curves;	//
+		
 		complex<double> EVAL(complex<double> );		// evaluate function on complex number
 		void compute_zeros_and_poles();		// determine Zeros and Poles from P and Q
 		void compute_coefficients();		// compute coefficients of P and Q

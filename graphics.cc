@@ -133,6 +133,31 @@ void draw_vector_field(rational_map R, long col){
 	};
 };
 
+void draw_integral_curves(rational_map R, long col){
+	int x, y;
+	point p,q;
+	complex<double> z,w;
+	int i;
+	for(x=0;x<600;x=x+10){
+		for(y=0;y<600;y=y+10){
+			p.x=x;
+			p.y=y;
+			z=point_to_complex(p);
+			if(abs(z)<3.0){
+				z=inverse_stereo(z);	// OK, got initial, viable point
+				for(i=0;i<1000;i++){
+					w=R.EVAL(z);
+					z=z+w/(1.0+abs(w)*1000.0);	// step size too small?
+		//			cout << z.real() << " + " << z.imag() << "\n";
+					q=complex_to_point(stereo_point(z));
+						draw_thin_line(p.x,p.y,q.x,q.y, col);
+					p=q;
+				};
+			};
+		};
+	};
+};
+
 void rational_map::draw_PZCV(){	// graphical output routine
 	int i;
 	point p;
@@ -149,13 +174,25 @@ void rational_map::draw_PZCV(){	// graphical output routine
 	draw_faint_circle(960,320,300);
 	switch(VF){
 		case 'D':
-			draw_vector_field(D(), 0x99AABB); // draw derivative
+			if(integral_curves){
+				draw_integral_curves(D(), 0xBBCCDD); // draw derivative
+			} else {
+				draw_vector_field(D(), 0x99AABB); // draw derivative
+			};
 			break;
 		case 'N':
-			draw_vector_field(N(), 0x99AABB); // draw nonlinearity
+			if(integral_curves){
+				draw_integral_curves(N(), 0xBBCCDD); // draw nonlinearity
+			} else {
+				draw_vector_field(N(), 0x99AABB); // draw nonlinearity
+			};
 			break;
 		case 'S':
-			draw_vector_field(Sch(), 0x99AABB); // draw Schwarzian
+			if(integral_curves){
+				draw_integral_curves(Sch(), 0xBBCCDD); // draw nonlinearity
+			} else {
+				draw_vector_field(Sch(), 0x99AABB); // draw nonlinearity
+			};
 		case 'X':
 			break;
 		default:
@@ -201,18 +238,24 @@ void rational_map::draw_PZCV(){	// graphical output routine
 	XDrawString(display,win, gc,120,665,S.c_str(),strlen(S.c_str()));
 	switch(VF){
 		case 'D':
-			S="Drawing derivative. Press [v] to toggle D/N/S/none.";
+			S="Drawing derivative.";
 			break;
 		case 'N':
-			S="Drawing nonlinearity. Press [v] to toggle D/N/S/none.";
+			S="Drawing nonlinearity.";
 			break;
 		case 'S':
-			S="Drawing Schwarzian. Press [v] to toggle D/N/S/none.";
+			S="Drawing Schwarzian.";
+			break;
 		case 'X':
-			S="Not drawing vector field. Press [v] to toggle D/N/S/none.";
+			S="Not drawing vector field.";
 			break;
 		default:
 			break;	
+	};
+	if(integral_curves){
+		S=S+" Integral curves on.";
+	} else {
+		S=S+" Integral curves off.";
 	};
 	XDrawString(display, win, gc, 800,665,S.c_str(),strlen(S.c_str()));
 };
@@ -296,6 +339,14 @@ void graphics_routine(rational_map &R, bool &finished){
 					default:
 						R.VF='X';
 						break;	
+				};
+				break;
+			};
+			if(XLookupKeysym(&report.xkey, 0) == XK_i){		// toggle integral curves
+				if(R.integral_curves){
+					R.integral_curves=false;
+				} else {
+					R.integral_curves=true;
 				};
 				break;
 			};
