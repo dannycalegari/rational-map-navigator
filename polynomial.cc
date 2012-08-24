@@ -132,6 +132,12 @@ polynomial operator%(polynomial P, polynomial Q){ // returns R so P=SQ+R with de
 	return(R);
 };
 
+polynomial operator*(polynomial P, complex<double> z){
+	polynomial Q;
+	Q=monomial(z,0);
+	return(P*Q);
+};
+
 void polynomial::compute_coefficients(){		// determine coefficients a[*] from roots r[*] and multiplier m
 	polynomial P,L;
 	int i;

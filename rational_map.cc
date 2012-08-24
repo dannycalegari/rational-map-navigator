@@ -10,11 +10,16 @@ class rational_map{
 		vector<complex<double> > V;		// critical values
 		char ZP;		// is 'Z' for zero or 'P' for pole
 		int ZP_index;	// index of ZP
-		
+		char VF;		// is 'D' for derivative, 'N' for nonlinearity, 'S' for Schwarzian, and 'X' for none
+				
 		complex<double> EVAL(complex<double> );		// evaluate function on complex number
 		void compute_zeros_and_poles();		// determine Zeros and Poles from P and Q
 		void compute_coefficients();		// compute coefficients of P and Q
 		void compute_C_and_V();				// compute critical points/values
+		rational_map D();					// derivative
+		rational_map N();					// nonlinearity
+		rational_map Sch();					// Schwarzian
+		
 		void select_ZP(complex<double>);	// select closest zero/pole to given point
 		void adjust_ZP(complex<double>);	// move selected zero/pole by amount
 		void draw_PZCV();					// graphical output routine
@@ -46,6 +51,102 @@ void rational_map::compute_C_and_V(){
 		C.push_back(W.r[i]);
 		V.push_back(EVAL(W.r[i]));
 	};
+};
+
+rational_map operator+(rational_map R, rational_map S){
+	rational_map T;
+	T.P=(R.P*S.Q)+(S.P*R.Q);
+	T.Q=R.Q*S.Q;
+	return(T);
+};
+
+rational_map operator-(rational_map R, rational_map S){
+	rational_map T;
+	T.P=(R.P*S.Q)-(S.P*R.Q);
+	T.Q=R.Q*S.Q;
+	return(T);
+};
+
+rational_map operator*(rational_map R, rational_map S){
+	rational_map T;
+	T.P=R.P*S.P;
+	T.Q=R.Q*S.Q;
+	return(T);
+};
+
+rational_map operator/(rational_map R, rational_map S){
+	rational_map T;
+	T.P=R.P*S.Q;
+	T.Q=R.Q*S.P;
+	return(T);
+};
+
+rational_map operator*(rational_map R, polynomial P){
+	rational_map S;
+	S.P=R.P*P;
+	S.Q=R.Q;
+	return(S);
+};
+
+rational_map operator*(rational_map R, complex<double> z){
+	polynomial P;
+	P=monomial(z,0);
+	return(R*P);
+};
+
+rational_map rational_map::D(){		// derivative
+	rational_map R;
+	R.P=Wronskian(P,Q);
+	R.Q=Q*Q;
+	return(R);
+};
+
+rational_map D(rational_map R){
+	rational_map S;
+	S.P=Wronskian(R.P,R.Q);
+	S.Q=R.Q*R.Q;
+	return(S);
+};
+
+rational_map rational_map::N(){		// nonlinearity
+	/* Nonlinearity is (log f')' = f''/f'
+	 if g=f', nonlinearity is g'/g
+	 if g=P/Q, nonlinearity is (P'Q-Q'P)*Q/P*Q^2 = P'/P - Q'/Q = (P'Q-Q'P)/PQ
+	 if f=P/Q so g=(P'Q-Q'P)/Q^2 then N(f) = (P''Q-Q''P)/(P'Q-Q'P) - 2Q'/Q
+	 = [(P''Q-Q''P)*Q - 2Q'(P'Q-Q'P)] / Q(P'Q-Q'P)
+	 = (P''Q^2 - Q''PQ - 2P'Q'Q - 2(Q')^2P) / Q(P'Q-Q'P) */
+	rational_map R;
+	R.P=Q*(Q*P.D().D() - P*Q.D().D())-Q.D()*Wronskian(P,Q)-Q.D()*Wronskian(P,Q);
+	R.P.a.pop_back();	// (last coefficient is zero)
+	R.Q=Q*Wronskian(P,Q);
+	return(R);
+};
+
+rational_map Schwarzian(rational_map R){		// returns the Schwarzian of the rational map
+	// Schwarzian is (f''/f')' - (f''/f')^2/2
+
+	return( D( D(D(R))/D(R) ) - ( D(D(R))*D(D(R))*0.5 / (D(R)*D(R)) ) );
+};	
+
+rational_map rational_map::Sch(){
+	/* S.P = -2P'''PQQ' + 6PQP''Q'' - 6PP''Q'Q' - 3QQP''P'' - 2PQQ'''P' -
+			6QP'P'Q'' + 6PP'Q'Q'' + 2P'''QQP' + 6QP'P''Q' - 3PPQ''Q'' + 2PPQ'''Q'
+	   S.Q = 2(QP' - PQ')^2
+	*/
+	rational_map R;
+	R.P = ((P.D().D().D())*Q.D()*P*Q)*(-2.0) + ((P.D().D())*(Q.D().D())*P*Q)*6.0 + ((P.D().D())*Q.D()*Q.D()*P)*(-6.0) +
+		((P.D().D())*(P.D().D())*Q*Q)*(-3.0) + ((Q.D().D().D())*P.D()*P*Q)*(-2.0) + ((Q.D().D())*P.D()*P.D()*Q)*(-6.0) +
+		((Q.D().D())*Q.D()*P.D()*P)*6.0 + ((P.D().D().D())*P.D()*Q*Q)*2.0 + ((P.D().D())*P.D()*Q.D()*Q)*(6.0) +
+		((Q.D().D())*(Q.D().D())*P*P)*(-3.0) + ((Q.D().D().D())*Q.D()*P*P)*2.0;
+	R.Q = (Wronskian(P,Q)*Wronskian(P,Q))*2.0;
+	R.P.a.pop_back();	// (last 4 coefficients are zero, because of cancellation)
+	R.P.a.pop_back();	
+	R.P.a.pop_back();	
+	R.P.a.pop_back();	
+
+//	cout << R.P.a[R.P.a.size()-1].real() << " + " << R.P.a[R.P.a.size()-1].imag() << "\n";
+//	cout << R.Q.a[R.Q.a.size()-1].real() << " + " << R.Q.a[R.Q.a.size()-1].imag() << "\n";
+	return(R);
 };
 
 void rational_map::select_ZP(complex<double> z){	// finds zero or pole closest to z, and sets the value of ZP and ZP_index

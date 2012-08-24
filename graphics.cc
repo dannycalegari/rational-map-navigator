@@ -88,9 +88,22 @@ void draw_faint_line(int x1, int y1, int x2, int y2){
         XDrawLine(display, win, gc, x1, y1, x2, y2);
 };
 
+void draw_thin_line(int x1, int y1, int x2, int y2, long col){
+        XSetForeground(display, gc, (long) col);
+        XSetLineAttributes(display, gc, 1, LineSolid, 1, 1);
+        XDrawLine(display, win, gc, x1, y1, x2, y2);
+};
+
 void draw_circle(int x, int y, int r, long col){
         XSetForeground(display, gc, col);
         XSetLineAttributes(display, gc, 1, LineSolid, 1, 1);
+        XSetFillStyle(display, gc, FillSolid);
+        XDrawArc(display, win, gc, x-r, y-r, 2*r, 2*r, 0, 23040);
+};
+
+void draw_thick_circle(int x, int y, int r, long col){
+        XSetForeground(display, gc, col);
+        XSetLineAttributes(display, gc, 4, LineSolid, 1, 1);
         XDrawArc(display, win, gc, x-r, y-r, 2*r, 2*r, 0, 23040);
 };
 
@@ -98,6 +111,26 @@ void draw_faint_circle(int x, int y, int r){
         XSetForeground(display, gc, (long) 0xDDDDDD);
         XSetLineAttributes(display, gc, 1, LineOnOffDash, 1, 1);
         XDrawArc(display, win, gc, x-r, y-r, 2*r, 2*r, 0, 23040);
+};
+
+void draw_vector_field(rational_map R, long col){
+	int x, y, xx, yy;
+	point p;
+	complex<double> z,w;
+	for(x=20;x<620;x=x+8){
+		for(y=20;y<620;y=y+8){
+			p.x=x;
+			p.y=y;
+			z=point_to_complex(p);
+			if(abs(z)<3.0){
+				z=inverse_stereo(z);
+				w=R.EVAL(z);
+				xx = (int) (8.0*w.real())/(1.0+abs(w));
+				yy = (int) (8.0*w.imag())/(1.0+abs(w));
+				draw_thin_line(x,y,x+xx,y+yy, col);
+			};
+		};
+	};
 };
 
 void rational_map::draw_PZCV(){	// graphical output routine
@@ -114,30 +147,47 @@ void rational_map::draw_PZCV(){	// graphical output routine
 	draw_faint_line(980,330,980,310);
 	draw_faint_circle(320,320,300);
 	draw_faint_circle(960,320,300);
+	switch(VF){
+		case 'D':
+			draw_vector_field(D(), 0x99AABB); // draw derivative
+			break;
+		case 'N':
+			draw_vector_field(N(), 0x99AABB); // draw nonlinearity
+			break;
+		case 'S':
+			draw_vector_field(Sch(), 0x99AABB); // draw Schwarzian
+		case 'X':
+			break;
+		default:
+			break;
+	};
+
 	for(i=0;i<Zeros.size();i++){
 		p=complex_to_point(stereo_point(Zeros[i]));
-		draw_circle(p.x,p.y,1,(long) 0xFF0000);
+		draw_thick_circle(p.x,p.y,1,(long) 0xFF0000);
 	};
 	for(i=0;i<Poles.size();i++){
 		p=complex_to_point(stereo_point(Poles[i]));
-		draw_circle(p.x,p.y,1,(long) 0x0000FF);
+		draw_thick_circle(p.x,p.y,1,(long) 0x0000FF);
 	};
 	if(ZP=='Z'){
 		p=complex_to_point(stereo_point(Zeros[ZP_index]));
 	} else {
 		p=complex_to_point(stereo_point(Poles[ZP_index]));
 	};
-	draw_circle(p.x,p.y,3,(long) 0x000000);	// big circle around selected Z/P
+	draw_circle(p.x,p.y,6,(long) 0x000000);	// big circle around selected Z/P
 	
 	for(i=0;i<C.size();i++){
 		p=complex_to_point(stereo_point(C[i]));
-		draw_circle(p.x,p.y,1,(long) 0x00FF00);
+		draw_thick_circle(p.x,p.y,1,(long) 0x00FF00);
 	};
 	for(i=0;i<V.size();i++){
 		p=complex_to_point(stereo_point(V[i]));
 		p.x=p.x+640;
-		draw_circle(p.x,p.y,1,(long) 0x3377AA);
+		draw_thick_circle(p.x,p.y,1,(long) 0x3377AA);
 	};
+    XSetForeground(display, gc, (long) 0x000000);
+
 	if(ZP=='Z'){
 		S="Current selected point is a zero, located at ";
 		z=Zeros[ZP_index];
@@ -148,8 +198,23 @@ void rational_map::draw_PZCV(){	// graphical output routine
 	T << z.real() << " + " << z.imag() << " i";
 	S=S+T.str();
 //	cout << S;
-    XSetForeground(display, gc, (long) 0x000000);
-	XDrawString(display,win, gc,20,665,S.c_str(),strlen(S.c_str()));
+	XDrawString(display,win, gc,120,665,S.c_str(),strlen(S.c_str()));
+	switch(VF){
+		case 'D':
+			S="Drawing derivative. Press [v] to toggle D/N/S/none.";
+			break;
+		case 'N':
+			S="Drawing nonlinearity. Press [v] to toggle D/N/S/none.";
+			break;
+		case 'S':
+			S="Drawing Schwarzian. Press [v] to toggle D/N/S/none.";
+		case 'X':
+			S="Not drawing vector field. Press [v] to toggle D/N/S/none.";
+			break;
+		default:
+			break;	
+	};
+	XDrawString(display, win, gc, 800,665,S.c_str(),strlen(S.c_str()));
 };
 
 point mouse_location(){
@@ -187,31 +252,51 @@ void graphics_routine(rational_map &R, bool &finished){
 			R.select_ZP(inverse_stereo(z));
 		case KeyPress:
 			if(XLookupKeysym(&report.xkey, 0) == XK_Right){		// adjust Z or P
-				z.real()=0.02;
+				z.real()=0.04;
 				z.imag()=0.00;
 				R.adjust_ZP(z);
 				break;
 			};
 			if(XLookupKeysym(&report.xkey, 0) == XK_Left){		// adjust Z or P
-				z.real()=-0.02;
+				z.real()=-0.04;
 				z.imag()=0.00;
 				R.adjust_ZP(z);
 				break;
 			};
 			if(XLookupKeysym(&report.xkey, 0) == XK_Up){		// adjust Z or P
 				z.real()=0.00;
-				z.imag()=0.02;
+				z.imag()=0.04;
 				R.adjust_ZP(z);
 				break;
 			};
 			if(XLookupKeysym(&report.xkey, 0) == XK_Down){		// adjust Z or P
 				z.real()=0.00;
-				z.imag()=-0.02;
+				z.imag()=-0.04;
 				R.adjust_ZP(z);				
 				break;
 			};
 			if(XLookupKeysym(&report.xkey, 0) == XK_o){		// output data
 				R.output_data();
+				break;
+			};
+			if(XLookupKeysym(&report.xkey, 0) == XK_v){		// toggle vector field D/N/S
+				switch(R.VF){
+					case 'X':
+						R.VF='D';
+						break;
+					case 'D':
+						R.VF='N';
+						break;
+					case 'N':
+						R.VF='S';
+						break;
+					case 'S':
+						R.VF='X';
+						break;
+					default:
+						R.VF='X';
+						break;	
+				};
 				break;
 			};
 			if(XLookupKeysym(&report.xkey, 0) == XK_q){		// quit

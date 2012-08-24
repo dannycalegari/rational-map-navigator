@@ -49,7 +49,7 @@ int main(int argc, char *argv[]){
 	vector<complex<double> > roots;
 	complex<double> m,z,w,eta;
 	polynomial P,Q;
-	rational_map R;
+	rational_map R,S;
 	int d,i;
 	bool finished;
 	
@@ -86,6 +86,8 @@ int main(int argc, char *argv[]){
 	R.ZP='Z';	
 	R.ZP_index=0;
 	
+	R.VF='X';	// initialize don't draw vector field
+	
 	setup_graphics();
 	setup_font();
 	finished=false;
@@ -94,6 +96,7 @@ int main(int argc, char *argv[]){
 	cout << "Select a zero or pole with mouse button. \n";
 	cout << "Adjust its values with arrow keys. \n";
 	cout << "To output data to screen, type [o]. \n";
+	cout << "To toggle vector field D/N/S/none, type [v]. \n";
 	cout << "To quit, type [q]. \n";
 	
 	while(finished==false){
