@@ -143,7 +143,7 @@ void draw_integral_curves(rational_map R, long col){
 			p.x=x;
 			p.y=y;
 			z=point_to_complex(p);
-			if(abs(z)<3.0){
+			if(abs(z)<2.95){
 				z=inverse_stereo(z);	// OK, got initial, viable point
 				for(i=0;i<1000;i++){
 					w=R.EVAL(z);
