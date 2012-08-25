@@ -192,7 +192,6 @@ polynomial D(polynomial P){		// derivative of polynomial
 complex<double> polynomial::find_root(){	// finds a root by Newton's method
 	complex<double> z;
 	int i;
-	bool found_root=false;
 	if(degree()==0){
 		cout << "degree 0 has no roots! \n";
 		return(0.0);
@@ -214,7 +213,6 @@ complex<double> polynomial::find_root(){	// finds a root by Newton's method
 complex<double> polynomial::find_nearby_root(complex<double> seed){	// finds a root by Newton's method
 	complex<double> z;
 	int i;
-	bool found_root=false;
 	cout << "initial value " << seed.real() << " + " << seed.imag() << "i\n";
 	cout << "EVAL is " << EVAL(seed).real() << " + " << EVAL(seed).imag() << "i\n";
 	if(degree()==0){

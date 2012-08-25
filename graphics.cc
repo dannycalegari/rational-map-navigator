@@ -154,7 +154,7 @@ void draw_integral_curves(rational_map R, long col){
 
 void draw_real_curves(rational_map R, long col){
 	int x, y;
-	point p,q;
+	point p;
 	complex<double> z,w,zz;
 	int i;
 	for(x=0;x<620;x=x+1){

@@ -256,7 +256,7 @@ void rational_map::compute_monodromy(){			// compute monodromy around critical v
 	permutation; thus for each critical value, we just need to work out which pair of zeros
 	steer into the corresponding critical point.	*/
 
-	int i,j;
+	int i;
 	complex<double> v,w;
 	complex<double> I (0.0,1.0);
 	double t;
@@ -303,40 +303,5 @@ void rational_map::compute_monodromy(){			// compute monodromy around critical v
 		select_ZP(w);
 		cout << ZP_index << "\n";
 	};
-/*
-		for(j=0;j<Zeros.size();j++){	
-			w=Zeros[j];		// jth preimage of zero
-			
-			for(t=0.0;t<=1.0-accuracy;t=t+accuracy){		// radial path from 0 to (1-acc)*v
-				w=PREIMAGE(v*t,w);
-				p=complex_to_point(stereo_point(w));
-				draw_point(p.x,p.y,0x000000);
-				p=complex_to_point(stereo_point(v*t));
-				p.x=p.x+640;
-				draw_point(p.x,p.y,0x00FF00);
-			};
-			for(t=0.0;t<TWOPI;t=t+0.01){	// positive loop around v of radius acc
-				w=PREIMAGE((1.0-accuracy)*v-(exp(t*I)-1.0)*v*accuracy,w);
-				p=complex_to_point(stereo_point(w));
-				draw_point(p.x,p.y,0x000000);
-				p=complex_to_point(stereo_point((1.0-accuracy)*v-(exp(t*I)-1.0)*v*accuracy));
-				p.x=p.x+640;
-				draw_point(p.x,p.y,0x0000FF);
-			};
-			for(t=1.0-accuracy;t>=0.0;t=t-accuracy){	// radial path from (1-acc)*v to 0
-				w=PREIMAGE(v*t,w);
-				p=complex_to_point(stereo_point(w));
-				draw_point(p.x,p.y,0x000000);
-				p=complex_to_point(stereo_point(v*t));
-				p.x=p.x+640;
-				draw_point(p.x,p.y,0xFF0000);
-			};	
-			
-			w=PREIMAGE(0.0,w);	// s_i(j)th preimage of zero
-			select_ZP(w);
-			cout << ZP_index << " ";	
-		};
-		cout << "\n";
-	};
-*/
+	cout << "\n";
 };

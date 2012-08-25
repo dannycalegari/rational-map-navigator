@@ -52,8 +52,7 @@ int main(int argc, char *argv[]){
 	complex<double> I (0.0,1.0);
 	polynomial P,Q;
 	rational_map R,S;
-	double t;
-	int d,i,j;
+	int d,i;
 	bool finished;
 	
 	m=1.0;
