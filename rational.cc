@@ -103,7 +103,7 @@ int main(int argc, char *argv[]){
 	cout << "To output data to screen, type [o]. \n";
 	cout << "To toggle vector field D/N/S/none, type [v]. \n";
 	cout << "To toggle integral curves on/off, type [i] (warning: very slow!) \n";
-	cout << "To compute monodromy, type [m]. \n";
+	cout << "Dial [m] for monodromy. \n";
 	cout << "To quit, type [q]. \n";
 	
 	while(finished==false){
