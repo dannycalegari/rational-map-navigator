@@ -248,6 +248,14 @@ void rational_map::output_data(){					// output data to cout
 };
 
 void rational_map::compute_monodromy(){			// compute monodromy around critical values along ``standard contours''
+	/* Function computes monodromy by steering in preimage space from opposite sides of a
+	critical value to zero, computing preimage using Newton's method, seeded to try to be as
+	continuous as possible. More robust would be to start at a (preimage of) 0 and steer along
+	a ray towards a critical value, and see if we hit a critical point. Note that for generic
+	coefficients, all critical points are *simple*, so the monodromy acts as an elementary
+	permutation; thus for each critical value, we just need to work out which pair of zeros
+	steer into the corresponding critical point.	*/
+
 	int i,j;
 	complex<double> v,w;
 	complex<double> I (0.0,1.0);
