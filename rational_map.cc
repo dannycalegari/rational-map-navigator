@@ -19,6 +19,8 @@ class rational_map{
 		void compute_zeros_and_poles();		// determine Zeros and Poles from P and Q
 		void compute_coefficients();		// compute coefficients of P and Q
 		void compute_C_and_V();				// compute critical points/values
+		void adjust_C_and_V();				// adjust values when coefficients move slightly
+		rational_map R();					// the function itself!
 		rational_map D();					// derivative
 		rational_map N();					// nonlinearity
 		rational_map Sch();					// Schwarzian
@@ -57,7 +59,7 @@ void rational_map::compute_coefficients(){
 	Q=make_polynomial(Poles,1.0);
 };
 
-void rational_map::compute_C_and_V(){
+void rational_map::compute_C_and_V(){	// compute for the first time
 	polynomial W;
 	int i;
 	W=Wronskian(P,Q);
@@ -67,6 +69,18 @@ void rational_map::compute_C_and_V(){
 	for(i=0;i<W.r.size();i++){
 		C.push_back(W.r[i]);
 		V.push_back(EVAL(W.r[i]));
+	};
+};
+
+void rational_map::adjust_C_and_V(){	// adjust values, tracking critical points
+	polynomial W;
+	int i;
+	complex<double> z;
+	W=Wronskian(P,Q);
+	for(i=0;i<C.size();i++){
+		z=W.find_nearby_root(C[i]);
+		C[i]=z;
+		V[i]=EVAL(z);
 	};
 };
 
@@ -109,6 +123,13 @@ rational_map operator*(rational_map R, complex<double> z){
 	polynomial P;
 	P=monomial(z,0);
 	return(R*P);
+};
+
+rational_map rational_map::R(){		// the function itself
+	rational_map R;
+	R.P = P;
+	R.Q = Q;
+	return(R);
 };
 
 rational_map rational_map::D(){		// derivative
@@ -232,8 +253,9 @@ void rational_map::compute_monodromy(){			// compute monodromy around critical v
 	complex<double> I (0.0,1.0);
 	double t;
 	double accuracy;
+	point p;
 	
-	accuracy=0.001;	// hardcoded; acc for short in comments hereafter
+	accuracy=0.0001;	// hardcoded; acc for short in comments hereafter
 
 	cout << "computing monodromy.\n";
 
@@ -242,17 +264,64 @@ void rational_map::compute_monodromy(){			// compute monodromy around critical v
 		cout << "critical value " << i << " = " << v.real() << " + " << v.imag() << " i\n";
 		cout << "monodromy permutation: ";
 
+		w=C[i]+sqrt(accuracy);	// ith critical point.
+		for(t=1.0-accuracy;t>=0.0;t=t-accuracy){	// radial path from (1-acc)*v to 0
+				w=PREIMAGE(v*t,w);
+				p=complex_to_point(stereo_point(w));
+				draw_point(p.x,p.y,0x100410*i*16/C.size());
+				p=complex_to_point(stereo_point(v*t));
+				p.x=p.x+640;
+				draw_point(p.x,p.y,0x100410*i*16/C.size());
+		};
+		select_ZP(w);
+		cout << ZP_index << " <-> ";
+		w=C[i]+sqrt(accuracy);	// ith critical point.
+		for(t=0.0;t<TWOPI;t=t+0.01){	// positive loop around v of radius acc
+				w=PREIMAGE((1.0-accuracy)*v-(exp(t*I)-1.0)*v*accuracy,w);
+				p=complex_to_point(stereo_point(w));
+				draw_point(p.x,p.y,0x100410*i*16/C.size());
+				p=complex_to_point(stereo_point((1.0-accuracy)*v-(exp(t*I)-1.0)*v*accuracy));
+				p.x=p.x+640;
+				draw_point(p.x,p.y,0x100410*i*16/C.size());
+		};
+		for(t=1.0-accuracy;t>=0.0;t=t-accuracy){	// radial path from (1-acc)*v to 0
+				w=PREIMAGE(v*t,w);
+				p=complex_to_point(stereo_point(w));
+				draw_point(p.x,p.y,0x100410*i*16/C.size());
+				p=complex_to_point(stereo_point(v*t));
+				p.x=p.x+640;
+				draw_point(p.x,p.y,0x100410*i*16/C.size());
+		};
+		select_ZP(w);
+		cout << ZP_index << "\n";
+	};
+/*
 		for(j=0;j<Zeros.size();j++){	
 			w=Zeros[j];		// jth preimage of zero
 			
 			for(t=0.0;t<=1.0-accuracy;t=t+accuracy){		// radial path from 0 to (1-acc)*v
 				w=PREIMAGE(v*t,w);
+				p=complex_to_point(stereo_point(w));
+				draw_point(p.x,p.y,0x000000);
+				p=complex_to_point(stereo_point(v*t));
+				p.x=p.x+640;
+				draw_point(p.x,p.y,0x00FF00);
 			};
 			for(t=0.0;t<TWOPI;t=t+0.01){	// positive loop around v of radius acc
 				w=PREIMAGE((1.0-accuracy)*v-(exp(t*I)-1.0)*v*accuracy,w);
+				p=complex_to_point(stereo_point(w));
+				draw_point(p.x,p.y,0x000000);
+				p=complex_to_point(stereo_point((1.0-accuracy)*v-(exp(t*I)-1.0)*v*accuracy));
+				p.x=p.x+640;
+				draw_point(p.x,p.y,0x0000FF);
 			};
 			for(t=1.0-accuracy;t>=0.0;t=t-accuracy){	// radial path from (1-acc)*v to 0
 				w=PREIMAGE(v*t,w);
+				p=complex_to_point(stereo_point(w));
+				draw_point(p.x,p.y,0x000000);
+				p=complex_to_point(stereo_point(v*t));
+				p.x=p.x+640;
+				draw_point(p.x,p.y,0xFF0000);
 			};	
 			
 			w=PREIMAGE(0.0,w);	// s_i(j)th preimage of zero
@@ -261,4 +330,5 @@ void rational_map::compute_monodromy(){			// compute monodromy around critical v
 		};
 		cout << "\n";
 	};
+*/
 };

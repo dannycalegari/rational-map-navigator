@@ -60,23 +60,7 @@ void erase_field(void){
 	XClearWindow(display, win);
 }
 
-struct point{
-	int x,y;
-};
 
-point complex_to_point(complex<double> z){
-	point p;
-	p.x = (int) 320.0+100.0*z.real();
-	p.y = (int) 320.0-100.0*z.imag();
-	return(p);
-};
-
-complex<double> point_to_complex(point p){
-	complex<double> z;
-	z.real()=((double) p.x-320)/100.0;
-	z.imag()=((double) 320-p.y)/100.0;
-	return(z);
-};
 
 void draw_line(int x1, int y1, int x2, int y2){
         XSetForeground(display, gc, (long) 0);
@@ -181,7 +165,7 @@ void draw_real_curves(rational_map R, long col){
 			if(abs(z)<3.0){
 				z=inverse_stereo(z);	// OK, got initial, viable point
 				w=R.EVAL(z);
-				i=((int) (w.imag()*0.4)) % 2;
+				i=(int) (1000.0+(w.imag()*0.4)) % 2;
 				if(i==0){
 					draw_point(p.x, p.y, col);
 				};
@@ -200,8 +184,8 @@ void rational_map::draw_PZCV(){	// graphical output routine
 	draw_line(0,640,1280,640);
 	draw_faint_line(310,320,330,320);
 	draw_faint_line(320,330,320,310);
-	draw_faint_line(970,320,990,320);
-	draw_faint_line(980,330,980,310);
+	draw_faint_line(950,320,970,320);
+	draw_faint_line(960,330,960,310);
 	draw_faint_circle(320,320,300);
 	draw_faint_circle(960,320,300);
 	switch(VF){
@@ -384,6 +368,13 @@ void graphics_routine(rational_map &R, bool &finished){
 			};
 			if(XLookupKeysym(&report.xkey, 0) == XK_m){		// compute monodromy
 				R.compute_monodromy();
+				while(1){
+					XNextEvent(display, &report);
+				//	if(report.type==KeyPress) {
+					if(report.type!=NULL){
+						break;
+					};
+				};
 				break;
 			};
 			if(XLookupKeysym(&report.xkey, 0) == XK_q){		// quit
