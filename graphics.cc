@@ -115,6 +115,11 @@ void draw_faint_circle(int x, int y, int r){
         XDrawArc(display, win, gc, x-r, y-r, 2*r, 2*r, 0, 23040);
 };
 
+void draw_point(int x, int y, long col){
+        XSetForeground(display, gc, col);
+		XDrawPoint(display, win, gc, x, y);
+};
+
 void draw_vector_field(rational_map R, long col){
 	int x, y, xx, yy;
 	point p;
@@ -140,8 +145,8 @@ void draw_integral_curves(rational_map R, long col){
 	point p,q;
 	complex<double> z,w,zz;
 	int i;
-	for(x=0;x<600;x=x+10){
-		for(y=0;y<600;y=y+10){
+	for(x=0;x<620;x=x+10){
+		for(y=0;y<620;y=y+10){
 			p.x=x;
 			p.y=y;
 			z=point_to_complex(p);
@@ -157,6 +162,28 @@ void draw_integral_curves(rational_map R, long col){
 						draw_thin_line(p.x,p.y,q.x,q.y, col);
 					};
 					p=q;
+				};
+			};
+		};
+	};
+};
+
+void draw_real_curves(rational_map R, long col){
+	int x, y;
+	point p,q;
+	complex<double> z,w,zz;
+	int i;
+	for(x=0;x<620;x=x+1){
+		for(y=0;y<620;y=y+1){
+			p.x=x;
+			p.y=y;
+			z=point_to_complex(p);
+			if(abs(z)<3.0){
+				z=inverse_stereo(z);	// OK, got initial, viable point
+				w=R.EVAL(z);
+				i=((int) (w.imag()*0.4)) % 2;
+				if(i==0){
+					draw_point(p.x, p.y, col);
 				};
 			};
 		};
