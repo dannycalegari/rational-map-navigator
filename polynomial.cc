@@ -26,7 +26,10 @@ class polynomial{
 		void compute_coefficients();	// determine coefficients a[*] from roots r[*] and multiplier m
 		polynomial D();					// derivative
 		complex<double> find_root();	// find a root by Newton's method
-		complex<double> find_nearby_root(complex<double>);	// find a root by Newton's method, with initial seed value
+		complex<double> find_nearby_root(complex<double>);	// find a root by Newton's method, with initial seed value; 
+			// note: "find_nearby_root" is surprisingly useless for tracking critical points/values
+		complex<double> closest_root(complex<double>);		// compares roots to find closest one to seed
+
 		void compute_roots();			// determine roots r[*] from coefficients a[*]
 		void write();
 };
@@ -213,8 +216,8 @@ complex<double> polynomial::find_root(){	// finds a root by Newton's method
 complex<double> polynomial::find_nearby_root(complex<double> seed){	// finds a root by Newton's method
 	complex<double> z;
 	int i;
-	cout << "initial value " << seed.real() << " + " << seed.imag() << "i\n";
-	cout << "EVAL is " << EVAL(seed).real() << " + " << EVAL(seed).imag() << "i\n";
+//	cout << "initial value " << seed.real() << " + " << seed.imag() << "i\n";
+//	cout << "EVAL is " << EVAL(seed).real() << " + " << EVAL(seed).imag() << "i\n";
 	if(degree()==0){
 		cout << "degree 0 has no roots! \n";
 		return(0.0);
@@ -224,7 +227,9 @@ complex<double> polynomial::find_nearby_root(complex<double> seed){	// finds a r
 			z=z-(EVAL(z))/(D().EVAL(z));	// standard adjustment
 			i++;
 			if(i>100){		// if it hasn't found a root quickly, pick new initial value
-				cout << "couldn't find a nearby root! picking random seed!\n";
+				cout << "\n";
+				cout << "	ERROR: couldn't find a nearby root! picking random seed!\n";
+				cout << "\n";
 				i=0;
 				real(z)=(double) (100.0*rand() / RAND_MAX)-50.0;
 				imag(z)=(double) (100.0*rand() / RAND_MAX)-50.0;
@@ -232,6 +237,21 @@ complex<double> polynomial::find_nearby_root(complex<double> seed){	// finds a r
 		};
 		return(z);
 	};
+};
+
+complex<double> polynomial::closest_root(complex<double> z){	// compares roots to find closest one to seed
+	complex<double> w;
+	int i, closest;
+	double closest_dist;
+	closest=0;
+	closest_dist=abs(r[0]-z);
+	for(i=0;i<r.size();i++){
+		if(abs(r[i]-z)<closest_dist){
+			closest=i;
+			closest_dist=abs(r[closest]-z);
+		};
+	};
+	return(r[closest]);
 };
 
 void polynomial::compute_roots(){

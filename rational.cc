@@ -40,6 +40,7 @@ using std::string;
 using std::vector;
 using std::complex; */
 
+#include "linear.cc"
 #include "points.cc"
 #include "polynomial.cc"
 #include "rational_map.cc"
@@ -68,18 +69,13 @@ int main(int argc, char *argv[]){
 	eta=exp(w);	// 2dth root of unity
 	roots.clear();	// initializing roots
 	for(i=0;i<d;i++){
-		roots.push_back((0.99*eta^(2*i)));
-		if(i==0){
-			roots[0]=roots[0]*1.25;
-		};
+		roots.push_back(eta^(2*i));
 	};
+	roots[0]=0.0;
 	R.Zeros=roots;
 	roots.clear();
 	for(i=0;i<d;i++){
-		roots.push_back((0.98*eta^(2*i+1)));
-		if(i==d/2){
-			roots[i]=roots[i]*1.2;
-		};
+		roots.push_back(0.99*eta^(2*i+1));
 	};
 	R.Poles=roots;
 	R.M=m;
@@ -91,6 +87,8 @@ int main(int argc, char *argv[]){
 	
 	R.VF='X';	// initialize don't draw vector field
 	R.integral_curves=false;
+	
+	R.compute_perturbation_matrix();
 	
 	setup_graphics();
 	setup_font();

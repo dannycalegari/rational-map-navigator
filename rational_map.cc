@@ -12,6 +12,8 @@ class rational_map{
 		int ZP_index;	// index of ZP
 		char VF;		// is 'D' for derivative, 'N' for nonlinearity, 'S' for Schwarzian, and 'X' for none
 		bool integral_curves;	//
+		vector< vector<complex<double> > > PERTURB;		// perturbation matrix
+
 		
 		complex<double> EVAL(complex<double> );		// evaluate function on complex number
 		complex<double> PREIMAGE(complex<double>, complex<double> );	// find inverse near prescribed seed value
@@ -31,6 +33,8 @@ class rational_map{
 		void output_data();					// output data to cout
 		
 		void compute_monodromy();			// compute monodromy around critical values along ``standard contours''
+
+		void compute_perturbation_matrix();		// how perturbing Z, P and m affects V
 };
 
 complex<double> rational_map::EVAL(complex<double> z){	// evaluate z
@@ -77,9 +81,12 @@ void rational_map::adjust_C_and_V(){	// adjust values, tracking critical points
 	int i;
 	complex<double> z;
 	W=Wronskian(P,Q);
+	W.compute_roots();	// these are the critical points of P/Q
 	for(i=0;i<C.size();i++){
-		z=W.find_nearby_root(C[i]);
+		z=W.closest_root(C[i]);	// numerically search for closest root
+//		cout << abs(C[i]-z) << " ";
 		C[i]=z;
+//		cout << abs(V[i]-EVAL(z)) << "\n";
 		V[i]=EVAL(z);
 	};
 };
@@ -226,7 +233,8 @@ void rational_map::adjust_ZP(complex<double> z){
 		Poles[ZP_index]=w;
 	};
 	compute_coefficients();
-	compute_C_and_V();
+//	compute_C_and_V();
+	adjust_C_and_V();
 };
 
 void rational_map::output_data(){					// output data to cout
@@ -304,4 +312,24 @@ void rational_map::compute_monodromy(){			// compute monodromy around critical v
 		cout << ZP_index << "\n";
 	};
 	cout << "\n";
+};
+
+void rational_map::compute_perturbation_matrix(){ 	// how perturbing Z, P and m affects V
+	vector<complex<double> > C;	// perturbation column
+	int i,j;
+	complex<double> z,w;
+	PERTURB.clear();
+	for(i=0;i<Zeros.size();i++){
+		C.clear();
+		for(j=0;j<V.size();j++){
+			z=V[j];
+			Zeros[i]=Zeros[i]+0.001;
+			adjust_C_and_V();
+			w=(V[j]-z)/0.001;	// approximate derivative
+			Zeros[i]=Zeros[i]-0.001;
+			adjust_C_and_V();
+			C.push_back(w);
+		};
+		PERTURB.push_back(C);
+	};
 };

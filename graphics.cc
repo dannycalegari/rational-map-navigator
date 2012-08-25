@@ -233,11 +233,19 @@ void rational_map::draw_PZCV(){	// graphical output routine
 	for(i=0;i<C.size();i++){
 		p=complex_to_point(stereo_point(C[i]));
 		draw_thick_circle(p.x,p.y,1,(long) 0x00FF00);
+		T << i;
+		S=T.str();
+		XDrawString(display,win,gc,p.x+3,p.y-3,S.c_str(),strlen(S.c_str()));
+		T.str("");
 	};
 	for(i=0;i<V.size();i++){
 		p=complex_to_point(stereo_point(V[i]));
 		p.x=p.x+640;
 		draw_thick_circle(p.x,p.y,1,(long) 0x3377AA);
+		T << i;
+		S=T.str();
+		XDrawString(display,win,gc,p.x+3,p.y-3,S.c_str(),strlen(S.c_str()));
+		T.str("");
 	};
     XSetForeground(display, gc, (long) 0x000000);
 
@@ -250,6 +258,8 @@ void rational_map::draw_PZCV(){	// graphical output routine
 	};
 	T << z.real() << " + " << z.imag() << " i";
 	S=S+T.str();
+	T.str("");
+
 //	cout << S;
 	XDrawString(display,win, gc,120,665,S.c_str(),strlen(S.c_str()));
 	switch(VF){
