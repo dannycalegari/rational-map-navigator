@@ -44,6 +44,8 @@ void setup_graphics(void){
 
 void setup_font(void){
     const char * fontname = "-*-georgia-*-r-*-*-14-*-*-*-*-*-*-*";
+ //   const char * fontname = "-*-times-*-r-*-*-16-*-*-*-*-*-*-*";
+
     font = XLoadQueryFont (display, fontname);
     /* If the font could not be loaded, revert to the "fixed" font. */
     if (! font) {
@@ -351,6 +353,10 @@ void graphics_routine(rational_map &R, bool &finished){
 				} else {
 					R.integral_curves=true;
 				};
+				break;
+			};
+			if(XLookupKeysym(&report.xkey, 0) == XK_m){		// compute monodromy
+				R.compute_monodromy();
 				break;
 			};
 			if(XLookupKeysym(&report.xkey, 0) == XK_q){		// quit

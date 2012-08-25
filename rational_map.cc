@@ -14,6 +14,8 @@ class rational_map{
 		bool integral_curves;	//
 		
 		complex<double> EVAL(complex<double> );		// evaluate function on complex number
+		complex<double> PREIMAGE(complex<double>, complex<double> );	// find inverse near prescribed seed value
+		
 		void compute_zeros_and_poles();		// determine Zeros and Poles from P and Q
 		void compute_coefficients();		// compute coefficients of P and Q
 		void compute_C_and_V();				// compute critical points/values
@@ -25,10 +27,24 @@ class rational_map{
 		void adjust_ZP(complex<double>);	// move selected zero/pole by amount
 		void draw_PZCV();					// graphical output routine
 		void output_data();					// output data to cout
+		
+		void compute_monodromy();			// compute monodromy around critical values along ``standard contours''
 };
 
 complex<double> rational_map::EVAL(complex<double> z){	// evaluate z
 	return(P(z)/Q(z));
+};
+
+complex<double> rational_map::PREIMAGE(complex<double> z, complex<double> seed){	// find inverse near prescribed seed value
+	complex<double> w,u,v;
+	v=seed;
+	w=EVAL(v);
+	while(abs(z-w)>0.00000000001){	// WARNING: accuracy hardcoded! should be able to specify this
+		u=D().EVAL(v);		
+		v=v-((w-z)/u);	// Newton's method
+		w=EVAL(v);
+	};
+	return(v);
 };
 
 void rational_map::compute_zeros_and_poles(){
@@ -207,5 +223,42 @@ void rational_map::output_data(){					// output data to cout
 	};
 	for(i=0;i<V.size();i++){
 		cout << "critical value " << i << " is " << V[i].real() << " + " << V[i].imag() << " i\n";
+	};
+};
+
+void rational_map::compute_monodromy(){			// compute monodromy around critical values along ``standard contours''
+	int i,j;
+	complex<double> v,w;
+	complex<double> I (0.0,1.0);
+	double t;
+	double accuracy;
+	
+	accuracy=0.001;	// hardcoded; acc for short in comments hereafter
+
+	cout << "computing monodromy.\n";
+
+	for(i=0;i<C.size();i++){	// ith critical value
+		v=V[i];
+		cout << "critical value " << i << " = " << v.real() << " + " << v.imag() << " i\n";
+		cout << "monodromy permutation: ";
+
+		for(j=0;j<Zeros.size();j++){	
+			w=Zeros[j];		// jth preimage of zero
+			
+			for(t=0.0;t<=1.0-accuracy;t=t+accuracy){		// radial path from 0 to (1-acc)*v
+				w=PREIMAGE(v*t,w);
+			};
+			for(t=0.0;t<TWOPI;t=t+0.01){	// positive loop around v of radius acc
+				w=PREIMAGE((1.0-accuracy)*v-(exp(t*I)-1.0)*v*accuracy,w);
+			};
+			for(t=1.0-accuracy;t>=0.0;t=t-accuracy){	// radial path from (1-acc)*v to 0
+				w=PREIMAGE(v*t,w);
+			};	
+			
+			w=PREIMAGE(0.0,w);	// s_i(j)th preimage of zero
+			select_ZP(w);
+			cout << ZP_index << " ";	
+		};
+		cout << "\n";
 	};
 };

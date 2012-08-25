@@ -48,12 +48,15 @@ using std::complex; */
 int main(int argc, char *argv[]){
 	vector<complex<double> > roots;
 	complex<double> m,z,w,eta;
+	complex<double> I (0.0,1.0);
 	polynomial P,Q;
 	rational_map R,S;
-	int d,i;
+	double t;
+	int d,i,j;
 	bool finished;
 	
 	m=1.0;
+	
 	
 	cout << "Welcome to the rational map explorer!\n";
 	cout << "Enter degree of rational map:";
@@ -65,7 +68,7 @@ int main(int argc, char *argv[]){
 	eta=exp(w);	// 2dth root of unity
 	roots.clear();	// initializing roots
 	for(i=0;i<d;i++){
-		roots.push_back((eta^(2*i)));
+		roots.push_back((1.1*eta^(2*i)));
 		if(i==0){
 			roots[0]=roots[0]*1.25;
 		};
@@ -73,7 +76,7 @@ int main(int argc, char *argv[]){
 	R.Zeros=roots;
 	roots.clear();
 	for(i=0;i<d;i++){
-		roots.push_back((eta^(2*i+1)));
+		roots.push_back((0.9*eta^(2*i+1)));
 		if(i==d/2){
 			roots[i]=roots[i]*1.2;
 		};
@@ -88,6 +91,8 @@ int main(int argc, char *argv[]){
 	
 	R.VF='X';	// initialize don't draw vector field
 	R.integral_curves=false;
+
+	R.compute_monodromy();
 	
 	setup_graphics();
 	setup_font();
@@ -99,11 +104,13 @@ int main(int argc, char *argv[]){
 	cout << "To output data to screen, type [o]. \n";
 	cout << "To toggle vector field D/N/S/none, type [v]. \n";
 	cout << "To toggle integral curves on/off, type [i] (warning: very slow!) \n";
+	cout << "To compute monodromy, type [m]. \n";
 	cout << "To quit, type [q]. \n";
 	
 	while(finished==false){
 		graphics_routine(R,finished);
 	};
+	
 	
 	return(0);
 }
