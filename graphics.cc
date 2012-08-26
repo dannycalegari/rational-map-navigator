@@ -302,6 +302,51 @@ point mouse_location(){
     return(p);
 };
 
+double norm(vector<complex<double> > v){
+	int i;
+	double t;
+	t=0;
+	for(i=0;i<v.size();i++){
+		t=t+abs(v[i]);
+	};
+	return(t);
+};
+
+void steer_to_roots_of_unity(rational_map &R){
+	int i,j;
+	complex<double> w, eta;
+	
+	w.real()=0;
+	w.imag()=TWOPI/(double) R.V.size();
+	eta=exp(w);	// 2d-2th root of unity
+
+	R.STEER.clear();
+	for(i=0;i<R.V.size();i++){
+		R.STEER.push_back(0.1*((eta^i)-R.V[i]));
+	};
+	
+	while(norm(R.STEER)>0.1){
+		erase_field();
+		R.draw_PZCV();
+		XFlush(display);
+		
+		for(i=0;i<R.V.size();i++){
+			R.STEER[i]=(0.1*((eta^i)-R.V[i]));
+		};		
+		R.compute_perturbation_matrix();
+		R.compute_adjust_vector();
+		R.M=R.M+0.008*R.ADJUST[0];
+		for(i=0;i<R.Zeros.size();i++){
+			R.Zeros[i]=R.Zeros[i]+0.008*R.ADJUST[i+1];
+		};
+		for(i=0;i<R.Poles.size();i++){
+			R.Poles[i]=R.Poles[i]+0.008*R.ADJUST[i+R.Zeros.size()+1];
+		};
+		R.compute_coefficients();
+		R.adjust_C_and_V();
+	};
+};		
+		
 
 void graphics_routine(rational_map &R, bool &finished){
 	// function stereo_point takes complex plane to disk of radius 2, stereographically
@@ -387,6 +432,10 @@ void graphics_routine(rational_map &R, bool &finished){
 				};
 				break;
 			};
+			if(XLookupKeysym(&report.xkey, 0) == XK_s){		// steer to roots of unity
+				steer_to_roots_of_unity(R);
+				break;
+			};
 			if(XLookupKeysym(&report.xkey, 0) == XK_q){		// quit
 				finished=true;
 				XCloseDisplay(display);
@@ -397,3 +446,4 @@ void graphics_routine(rational_map &R, bool &finished){
 				break;
 	};
 };
+

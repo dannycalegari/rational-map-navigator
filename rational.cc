@@ -47,13 +47,15 @@ using std::complex; */
 #include "graphics.cc"
 
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]){	
+	
+	
 	vector<complex<double> > roots;
 	complex<double> m,z,w,eta;
 	complex<double> I (0.0,1.0);
 	polynomial P,Q;
 	rational_map R,S;
-	int d,i;
+	int d,i,j;
 	bool finished;
 	
 	m=1.0;
@@ -71,12 +73,14 @@ int main(int argc, char *argv[]){
 	for(i=0;i<d;i++){
 		roots.push_back(eta^(2*i));
 	};
-	roots[0]=0.0;
+	roots[roots.size()-1]=-0.5;
+	roots[roots.size()-2]=0.5;
 	R.Zeros=roots;
 	roots.clear();
 	for(i=0;i<d;i++){
-		roots.push_back(0.99*eta^(2*i+1));
+		roots.push_back(eta^(2*i+1));
 	};
+	roots[roots.size()-1]=3.0;
 	R.Poles=roots;
 	R.M=m;
 
@@ -87,8 +91,6 @@ int main(int argc, char *argv[]){
 	
 	R.VF='X';	// initialize don't draw vector field
 	R.integral_curves=false;
-	
-	R.compute_perturbation_matrix();
 	
 	setup_graphics();
 	setup_font();
@@ -101,6 +103,7 @@ int main(int argc, char *argv[]){
 	cout << "To toggle vector field D/N/S/none, type [v]. \n";
 	cout << "To toggle integral curves on/off, type [i] (warning: very slow!) \n";
 	cout << "Dial [m] for monodromy. \n";
+	cout << "To steer critical values to roots of unity, type [s]. (warning: experimental!) \n";
 	cout << "To quit, type [q]. \n";
 	
 	while(finished==false){

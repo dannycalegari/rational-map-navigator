@@ -13,6 +13,9 @@ class rational_map{
 		char VF;		// is 'D' for derivative, 'N' for nonlinearity, 'S' for Schwarzian, and 'X' for none
 		bool integral_curves;	//
 		vector< vector<complex<double> > > PERTURB;		// perturbation matrix
+		vector< complex<double> > STEER;				// steer vector
+		vector<complex<double> > ADJUST;				// adjust vector
+			// this should satisfy PERTURB.ADJUST = STEER
 
 		
 		complex<double> EVAL(complex<double> );		// evaluate function on complex number
@@ -35,6 +38,7 @@ class rational_map{
 		void compute_monodromy();			// compute monodromy around critical values along ``standard contours''
 
 		void compute_perturbation_matrix();		// how perturbing Z, P and m affects V
+		void compute_adjust_vector();	// how should we perturb Z, P, m to make V move in the direction STEER?
 };
 
 complex<double> rational_map::EVAL(complex<double> z){	// evaluate z
@@ -315,21 +319,46 @@ void rational_map::compute_monodromy(){			// compute monodromy around critical v
 };
 
 void rational_map::compute_perturbation_matrix(){ 	// how perturbing Z, P and m affects V
-	vector<complex<double> > C;	// perturbation column
+	/* this is a terrible implementation. needs to be much faster and more intelligent. */
 	int i,j;
 	complex<double> z,w;
+	vector<complex<double> > COL; 	
 	PERTURB.clear();
+	PERTURB.push_back(V);			// derivative of V with respect to M
+
+//	for(i=0;i<Zeros.size()-2;i++){
 	for(i=0;i<Zeros.size();i++){
-		C.clear();
+
+		COL=V;
+		Zeros[i]=Zeros[i]+0.00000001;
+		compute_coefficients();
+		adjust_C_and_V();
 		for(j=0;j<V.size();j++){
-			z=V[j];
-			Zeros[i]=Zeros[i]+0.001;
-			adjust_C_and_V();
-			w=(V[j]-z)/0.001;	// approximate derivative
-			Zeros[i]=Zeros[i]-0.001;
-			adjust_C_and_V();
-			C.push_back(w);
+			COL[j]=(V[j]-COL[j])/0.00000001;	// approximate derivative
 		};
-		PERTURB.push_back(C);
+		Zeros[i]=Zeros[i]-0.00000001;
+		compute_coefficients();
+		adjust_C_and_V();
+		PERTURB.push_back(COL);		// derivative of V with respect to Z[i]
+	};
+//	for(i=0;i<Poles.size()-1;i++){
+	for(i=0;i<Poles.size();i++){
+
+		COL=V;
+		Poles[i]=Poles[i]+0.00000001;
+		compute_coefficients();
+		adjust_C_and_V();
+		for(j=0;j<V.size();j++){
+			COL[j]=(V[j]-COL[j])/0.00000001;	// approximate derivative
+		};
+		Poles[i]=Poles[i]-0.00000001;
+		compute_coefficients();
+		adjust_C_and_V();
+		PERTURB.push_back(COL);		// derivative of V with respect to P[i]
 	};
 };
+
+void rational_map::compute_adjust_vector(){
+	ADJUST=invert_matrix(PERTURB, STEER);
+};	// how should we perturb Z, P, m to make V move in the direction STEER?
+
