@@ -313,6 +313,8 @@ double norm(vector<complex<double> > v){
 };
 
 void steer_to_roots_of_unity(rational_map &R){
+	// adjusts zeros/poles to move critical values in a "straight" line to roots of unity
+	
 	int i,j;
 	complex<double> w, eta;
 	
@@ -325,27 +327,43 @@ void steer_to_roots_of_unity(rational_map &R){
 		R.STEER.push_back(0.1*((eta^i)-R.V[i]));
 	};
 	
+	j=0;
 	while(norm(R.STEER)>0.1){
-		erase_field();
-		R.draw_PZCV();
-		XFlush(display);
+		if(j%20==0){
+			erase_field();
+			R.draw_PZCV();
+			XFlush(display);
+		};
 		
 		for(i=0;i<R.V.size();i++){
 			R.STEER[i]=(0.1*((eta^i)-R.V[i]));
 		};		
 		R.compute_perturbation_matrix();
 		R.compute_adjust_vector();
-		R.M=R.M+0.008*R.ADJUST[0];
+		R.M=R.M+0.02*R.ADJUST[0];
 		for(i=0;i<R.Zeros.size();i++){
-			R.Zeros[i]=R.Zeros[i]+0.008*R.ADJUST[i+1];
+			R.Zeros[i]=R.Zeros[i]+0.02*R.ADJUST[i+1];
 		};
 		for(i=0;i<R.Poles.size();i++){
-			R.Poles[i]=R.Poles[i]+0.008*R.ADJUST[i+R.Zeros.size()+1];
+			R.Poles[i]=R.Poles[i]+0.02*R.ADJUST[i+R.Zeros.size()+1];
 		};
 		R.compute_coefficients();
 		R.adjust_C_and_V();
 	};
 };		
+
+void braid_critical_values(rational_map &R, int j, bool positive){
+	// assuming there are a pair of critical values at e^2pi.i.j/(2d-2) and e^2pi.i.(j+1)/(2d-2)
+	// it braids j around j+1 positively if positive==true and negatively otherwise
+	
+	int i;
+	complex<double> w, eta;
+	
+	w.real()=0;
+	w.imag()=TWOPI/(double) R.V.size();
+	eta=exp(w);	// 2d-2th root of unity
+
+};
 		
 
 void graphics_routine(rational_map &R, bool &finished){

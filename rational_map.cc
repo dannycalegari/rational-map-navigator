@@ -319,7 +319,11 @@ void rational_map::compute_monodromy(){			// compute monodromy around critical v
 };
 
 void rational_map::compute_perturbation_matrix(){ 	// how perturbing Z, P and m affects V
-	/* this is a terrible implementation. needs to be much faster and more intelligent. */
+	/* This is a terrible implementation. needs to be much faster and more intelligent. 
+	It's main drawback is that it computes secant approximations to the Jacobian, rather than 
+	the true Jacobian. In fact, there is a (slightly messy, but elementary) closed formula
+	for the actual Jacobian in terms of P and Q, and I should just implement that. */
+
 	int i,j;
 	complex<double> z,w;
 	vector<complex<double> > COL; 	
@@ -330,13 +334,13 @@ void rational_map::compute_perturbation_matrix(){ 	// how perturbing Z, P and m 
 	for(i=0;i<Zeros.size();i++){
 
 		COL=V;
-		Zeros[i]=Zeros[i]+0.00000001;
+		Zeros[i]=Zeros[i]+0.0001;
 		compute_coefficients();
 		adjust_C_and_V();
 		for(j=0;j<V.size();j++){
-			COL[j]=(V[j]-COL[j])/0.00000001;	// approximate derivative
+			COL[j]=(V[j]-COL[j])/0.0001;	// approximate derivative
 		};
-		Zeros[i]=Zeros[i]-0.00000001;
+		Zeros[i]=Zeros[i]-0.0001;
 		compute_coefficients();
 		adjust_C_and_V();
 		PERTURB.push_back(COL);		// derivative of V with respect to Z[i]
@@ -345,13 +349,13 @@ void rational_map::compute_perturbation_matrix(){ 	// how perturbing Z, P and m 
 	for(i=0;i<Poles.size();i++){
 
 		COL=V;
-		Poles[i]=Poles[i]+0.00000001;
+		Poles[i]=Poles[i]+0.0001;
 		compute_coefficients();
 		adjust_C_and_V();
 		for(j=0;j<V.size();j++){
-			COL[j]=(V[j]-COL[j])/0.00000001;	// approximate derivative
+			COL[j]=(V[j]-COL[j])/0.0001;	// approximate derivative
 		};
-		Poles[i]=Poles[i]-0.00000001;
+		Poles[i]=Poles[i]-0.0001;
 		compute_coefficients();
 		adjust_C_and_V();
 		PERTURB.push_back(COL);		// derivative of V with respect to P[i]
