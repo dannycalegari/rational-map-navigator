@@ -329,15 +329,15 @@ void rational_map::steer_to_target(){
 		PROX.push_back(1.0);
 	};
 	
-//	j=0;
+	j=0;
 	SPEED=0.03;
 	STEER=PROX;
 	while(norm(PROX)>0.01){
-	//	if(j%20==0){
+		if(j%4==0){
 			erase_field();
 			draw_PZCV();
 			XFlush(display);
-	//	};
+		};
 		
 		for(i=0;i<(int) V.size();i++){
 			PROX[i]=((TARGET[i]-V[i]));
@@ -364,7 +364,7 @@ void rational_map::steer_to_target(){
 		compute_coefficients();
 
 		adjust_C_and_V();
-//		j++;
+		j++;
 	};
 };		
 

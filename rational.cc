@@ -73,14 +73,13 @@ int main(int argc, char *argv[]){
 	for(i=0;i<d;i++){
 		roots.push_back(eta^(2*i));
 	};
-	roots[0]=-4.0+3.0*I;
+	roots[0]=-5.0;
 	R.Zeros=roots;
 	roots.resize(0);
 	for(i=0;i<d;i++){
 		roots.push_back(eta^(2*i+1));
 	};
-	roots[0]=4.0+3.0*I;
-	roots[1]=0.0-5.0*I;
+	roots[0]=5.0;
 	R.Poles=roots;
 	R.M=m;
 
