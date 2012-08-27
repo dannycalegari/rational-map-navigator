@@ -64,7 +64,7 @@ int main(int argc, char *argv[]){
 	cout << "Welcome to the rational map explorer!\n";
 	cout << "Enter degree of rational map:";
 	cin >> d;
-	cout << "Setting up initial zeros/poles.\n";
+	cout << "Setting up initial zeros/poles.\n\n";
 	
 	w.real()=0;
 	w.imag()=TWOPI/(2.0*(double) d);
@@ -96,17 +96,22 @@ int main(int argc, char *argv[]){
 	setup_graphics();
 	setup_font();
 	finished=false;
-	cout << "Zeros are red, Poles are blue. \n";
-	cout << "Critical points are green, critical values (on RHS) are light blue.\n";
+	cout << "Zeros are red, Poles are blue, Critical points are green (all on LHS). \n";
+	cout << "Critical values are light blue (on RHS). \n\n";
+	
 	cout << "Select a zero or pole with mouse button. \n";
-	cout << "Adjust its values with arrow keys. \n";
+	cout << "Adjust its values with arrow keys. \n\n";
+	
+	cout << "Select a critical value with mouse button. \n";
+	cout << "To steer critical values to roots of unity, type [s]. (warning: experimental!) \n";
+	cout << "To push critical values out/in, type [a]/[z]. \n";
+	cout << "To rotate critical values positively/negatively, type [x]/[c]. \n\n";
+	
 	cout << "To output data to screen, type [o]. \n";
 	cout << "To toggle vector field D/N/S/none, type [v]. \n";
 	cout << "To toggle integral curves on/off, type [i] (warning: very slow!) \n";
-	cout << "Dial [m] for monodromy. \n";
-	cout << "To steer critical values to roots of unity, type [s]. (warning: experimental!) \n";
-	cout << "To push critical values out/in, type [a]/[z]. \n";
-	cout << "To rotate critical values positively/negatively, type [x]/[c]. \n";
+	cout << "Dial [m] for monodromy. \n\n";
+
 	cout << "To quit, type [q]. \n";
 	
 	while(finished==false){
