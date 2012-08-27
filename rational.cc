@@ -69,13 +69,13 @@ int main(int argc, char *argv[]){
 	w.real()=0;
 	w.imag()=TWOPI/(2.0*(double) d);
 	eta=exp(w);	// 2dth root of unity
-	roots.clear();	// initializing roots
+	roots.resize(0);	// initializing roots
 	for(i=0;i<d;i++){
 		roots.push_back(eta^(2*i));
 	};
 	roots[0]=-5.0;
 	R.Zeros=roots;
-	roots.clear();
+	roots.resize(0);
 	for(i=0;i<d;i++){
 		roots.push_back(eta^(2*i+1));
 	};
@@ -85,6 +85,7 @@ int main(int argc, char *argv[]){
 
 	R.compute_coefficients();
 	R.compute_C_and_V();
+	R.initialize_perturbation_matrix();
 	R.ZP='Z';	
 	R.ZP_index=0;
 	

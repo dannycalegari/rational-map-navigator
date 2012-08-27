@@ -98,7 +98,7 @@ polynomial operator-(polynomial P, polynomial Q){
 
 polynomial operator*(polynomial P, polynomial Q){
 	polynomial R;
-	R.a.clear();
+	R.a.resize(0);
 	complex<double> z;
 	int i,j;
 	for(i=0;i<=P.degree()+Q.degree();i++){
@@ -145,15 +145,15 @@ polynomial operator*(polynomial P, complex<double> z){
 void polynomial::compute_coefficients(){		// determine coefficients a[*] from roots r[*] and multiplier m
 	polynomial P,L;
 	int i;
-	P.a.clear();	// first, clear coefficients
+	P.a.resize(0);	// first, clear coefficients
 	P.a.push_back(1.0);	// initialize to the constant polynomial 1
 	for(i=0;i<(int) r.size();i++){	// for each root
-		L.a.clear();
+		L.a.resize(0);
 		L.a.push_back(-r[i]);
 		L.a.push_back(1.0);		// L = (z-r[i])
 		P=P*L;
 	};
-	a.clear();
+	a.resize(0);
 	for(i=0;i<(int) P.a.size();i++){
 		a.push_back(m*P.a[i]);
 	};
@@ -163,11 +163,10 @@ polynomial make_polynomial(vector<complex<double> > r, complex<double> m){	// re
 	polynomial P;
 	int i;
 	P.m=m;
-	P.r.clear();
+//	P.r.resize(0);
 	for(i=0;i<(int) r.size();i++){
 		P.r.push_back(r[i]);
 	};
-	P.a.clear();
 	P.compute_coefficients();
 	return(P);
 };
@@ -175,7 +174,7 @@ polynomial make_polynomial(vector<complex<double> > r, complex<double> m){	// re
 polynomial polynomial::D(){		// derivative of polynomial
 	polynomial Q;
 	int i;
-	Q.a.clear();
+	Q.a.resize(0);
 	for(i=1;i<=degree();i++){
 		Q.a.push_back((complex<double>) i*a[i]);
 	};
@@ -185,7 +184,7 @@ polynomial polynomial::D(){		// derivative of polynomial
 polynomial D(polynomial P){		// derivative of polynomial
 	polynomial Q;
 	int i;
-	Q.a.clear();
+	Q.a.resize(0);
 	for(i=1;i<=P.degree();i++){
 		Q.a.push_back((complex<double>) i*P.a[i]);
 	};
@@ -258,8 +257,8 @@ void polynomial::compute_roots(){
 	polynomial R,S;
 	complex<double> z;
 	int i;
-	r.clear();	// clear list of roots
-	R.a.clear();
+	r.resize(0);	// clear list of roots
+	R.a.resize(0);
 	for(i=0;i<(int) a.size();i++){
 		R.a.push_back(a[i]);
 	};

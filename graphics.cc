@@ -312,7 +312,7 @@ double norm(vector<complex<double> > v){
 	return(t);
 };
 
-void steer_to_roots_of_unity(rational_map &R){
+void rational_map::steer_to_roots_of_unity(){
 	// adjusts zeros/poles to move critical values in a "straight" line to roots of unity
 	
 	int i,j;
@@ -321,50 +321,48 @@ void steer_to_roots_of_unity(rational_map &R){
 	double SPEED;
 	
 	w.real()=0;
-	w.imag()=TWOPI/(double) R.V.size();
+	w.imag()=TWOPI/(double) V.size();
 	eta=exp(w);	// 2d-2th root of unity
 	
-	R.STEER.clear();
-	PROX.clear();
-	
-	for(i=0;i<(int) R.V.size();i++){
+	for(i=0;i<(int) V.size();i++){
 		PROX.push_back(1.0);
 	};
 	
 //	j=0;
 	SPEED=0.03;
-	R.STEER=PROX;
+	STEER=PROX;
 	while(norm(PROX)>0.01){
 	//	if(j%20==0){
 			erase_field();
-			R.draw_PZCV();
+			draw_PZCV();
 			XFlush(display);
 	//	};
 		
-		for(i=0;i<(int) R.V.size();i++){
-			PROX[i]=(((eta^i)-R.V[i]));
+		for(i=0;i<(int) V.size();i++){
+			PROX[i]=(((eta^i)-V[i]));
 			if(abs(PROX[i])<0.1){	// if close enough,
-				R.STEER[i]=PROX[i]/SPEED;
+				STEER[i]=PROX[i]/SPEED;
 			} else if(abs(PROX[i])<0.2){
-				R.STEER[i]=PROX[i]*5.0;
+				STEER[i]=PROX[i]*5.0;
 			} else	{
-				R.STEER[i]=PROX[i]*(1.0+ 1.0/abs(PROX[i]));
-				if(abs(R.STEER[i])>10.0){	// absolute speed limit
-					R.STEER[i]=R.STEER[i]*10.0/abs(R.STEER[i]);
+				STEER[i]=PROX[i]*(1.0+ 1.0/abs(PROX[i]));
+				if(abs(STEER[i])>10.0){	// absolute speed limit
+					STEER[i]=STEER[i]*10.0/abs(STEER[i]);
 				};
 			};
 		};		
-		R.compute_perturbation_matrix();
-		R.compute_adjust_vector();
-		R.M=R.M+SPEED*R.ADJUST[0];
-		for(i=0;i<(int) R.Zeros.size();i++){
-			R.Zeros[i]=R.Zeros[i]+SPEED*R.ADJUST[i+1];
+		compute_perturbation_matrix();
+		compute_adjust_vector();
+		M=M+SPEED*ADJUST[0];
+		for(i=0;i<(int) Zeros.size();i++){
+			Zeros[i]=Zeros[i]+SPEED*ADJUST[i+1];
 		};
-		for(i=0;i<(int) R.Poles.size();i++){
-			R.Poles[i]=R.Poles[i]+SPEED*R.ADJUST[i+R.Zeros.size()+1];
+		for(i=0;i<(int) Poles.size();i++){
+			Poles[i]=Poles[i]+SPEED*ADJUST[i+Zeros.size()+1];
 		};
-		R.compute_coefficients();
-		R.adjust_C_and_V();
+		compute_coefficients();
+
+		adjust_C_and_V();
 //		j++;
 	};
 };		
@@ -468,7 +466,7 @@ void graphics_routine(rational_map &R, bool &finished){
 				break;
 			};
 			if(XLookupKeysym(&report.xkey, 0) == XK_s){		// steer to roots of unity
-				steer_to_roots_of_unity(R);
+				R.steer_to_roots_of_unity();
 				break;
 			};
 			if(XLookupKeysym(&report.xkey, 0) == XK_q){		// quit

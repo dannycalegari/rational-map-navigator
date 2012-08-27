@@ -20,7 +20,7 @@ vector<complex<double> >  mul_matrix(vector< vector<complex<double> > > N, vecto
 	vector<complex<double> > w;
 	complex<double> z;
 	int i,j;
-	w.clear();
+	w.resize(0);
 	for(i=0;i<(int) N[0].size();i++){
 		z=0.0;
 		for(j=0;j<(int) N.size();j++){
@@ -61,14 +61,14 @@ vector<complex<double> >  invert_matrix(vector< vector<complex<double> > > N, ve
 	
 	vector< vector<complex<double> > > U;	// matrix
 	for(j=0;j<cols;j++){	// initialize U to the identity matrix
-		w.clear();
+		w.resize(0);
 		for(i=0;i<cols;i++){
 			w.push_back(0.0);
 		};
 		w[j]=1.0;
 		U.push_back(w);
 	};
-	w.clear();
+	w.resize(0);
 	
 	// RULE: as we adjust M, we adjust U so that always  NU = M
 
@@ -93,14 +93,14 @@ vector<complex<double> >  invert_matrix(vector< vector<complex<double> > > N, ve
 			};
 		};
 	// swap columns k and i
-		w.clear();
+		w.resize(0);
 		for(m=0;m<rows;m++){
 			w.push_back(M[i][m]);
 			M[i][m]=M[k][m];
 			M[k][m]=w[m];
 		};
 	// keep U in sync
-		w.clear();
+		w.resize(0);
 		for(m=0;m<cols;m++){
 			w.push_back(U[i][m]);
 			U[i][m]=U[k][m];

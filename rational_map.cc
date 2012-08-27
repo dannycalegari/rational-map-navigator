@@ -37,10 +37,13 @@ class rational_map{
 		
 		void compute_monodromy();			// compute monodromy around critical values along ``standard contours''
 
+		void initialize_perturbation_matrix();
 		void compute_perturbation_matrix();		// how perturbing Z, P and m affects V
-		void compute_Jacobian();				// better implementation of compute_perturbation_matrix()
-			
+	//	void compute_Jacobian();				// better implementation of compute_perturbation_matrix()
 		void compute_adjust_vector();	// how should we perturb Z, P, m to make V move in the direction STEER?
+
+		void steer_to_roots_of_unity();		// adjust V in a straight line to roots of unity
+		void braid_V(int, int);					// braid V[i] from eta^i around eta^j and back
 };
 
 complex<double> rational_map::EVAL(complex<double> z){	// evaluate z
@@ -74,8 +77,8 @@ void rational_map::compute_C_and_V(){	// compute for the first time
 	int i;
 	W=Wronskian(P,Q);
 	W.compute_roots();	// these are the critical points of P/Q
-	C.clear();
-	V.clear();
+	C.resize(0);
+	V.resize(0);
 	for(i=0;i<(int) W.r.size();i++){
 		C.push_back(W.r[i]);
 		V.push_back(EVAL(W.r[i]));
@@ -323,6 +326,17 @@ void rational_map::compute_monodromy(){			// compute monodromy around critical v
 	cout << "\n";
 };
 
+void rational_map::initialize_perturbation_matrix(){
+	int i,j;
+	vector<complex<double> > COL;
+	for(i=0;i<(int) V.size();i++){
+		COL.push_back(0.0);
+	};
+	for(j=0;j<2*Zeros.size()+1;j++){
+		PERTURB.push_back(COL);
+	};
+};
+
 void rational_map::compute_perturbation_matrix(){ 	// how perturbing Z, P and m affects V
 	/* This is a terrible implementation. needs to be much faster and more intelligent. 
 	It's main drawback is that it computes secant approximations to the Jacobian, rather than 
@@ -332,56 +346,59 @@ void rational_map::compute_perturbation_matrix(){ 	// how perturbing Z, P and m 
 	int i,j;
 	complex<double> z,w;
 	vector<complex<double> > COL; 	
-	PERTURB.clear();
 	
-	COL.clear();
+	COL=V;
 	for(i=0;i<(int) V.size();i++){
-		COL.push_back(V[i]/M);
+		COL[i]=V[i]/M;
 	};
-	PERTURB.push_back(COL);			// derivative of V with respect to M
-	COL.clear();
+	PERTURB[0]=COL;		// derivative of V with respect to M
 	
 	for(i=0;i<(int) Zeros.size();i++){
 		COL=V;
-		Zeros[i]=Zeros[i]+0.001;
+		Zeros[i]=Zeros[i]+0.0001;
 		compute_coefficients();
 		adjust_C_and_V();
 		for(j=0;j<(int) V.size();j++){
-			COL[j]=(V[j]-COL[j])/0.001;	// approximate derivative
+			COL[j]=(V[j]-COL[j])/0.0001;	// approximate derivative
 		};
-		Zeros[i]=Zeros[i]-0.001;
+		Zeros[i]=Zeros[i]-0.0001;
 		compute_coefficients();
 		adjust_C_and_V();
-		PERTURB.push_back(COL);		// derivative of V with respect to Z[i]
+		PERTURB[i+1]=COL;	// derivative of V with respect to Z[i]
 	};
 	for(i=0;i<(int) Poles.size();i++){
 
 		COL=V;
-		Poles[i]=Poles[i]+0.001;
+		Poles[i]=Poles[i]+0.0001;
 		compute_coefficients();
 		adjust_C_and_V();
 		for(j=0;j<(int) V.size();j++){
-			COL[j]=(V[j]-COL[j])/0.001;	// approximate derivative
+			COL[j]=(V[j]-COL[j])/0.0001;	// approximate derivative
 		};
-		Poles[i]=Poles[i]-0.001;
+		Poles[i]=Poles[i]-0.0001;
 		compute_coefficients();
 		adjust_C_and_V();
-		PERTURB.push_back(COL);		// derivative of V with respect to P[i]
+		PERTURB[i+Zeros.size()+1]=COL;	// derivative of V with respect to P[i]
 	};
 };
 
+void rational_map::compute_adjust_vector(){
+	ADJUST=invert_matrix(PERTURB, STEER);
+};	// how should we perturb Z, P, m to make V move in the direction STEER?
+
+/*
 void rational_map::compute_Jacobian(){
 	// experimental; seems buggy
 	int i,j;
 	complex<double> z,w;
 	vector<complex<double> > COL;
-	PERTURB.clear();
+	PERTURB.resize(0);
 	rational_map dRdlambda, dWdlambda;
 	polynomial L;
-	L.a.clear();
+	L.a.resize(0);
 
 	
-	COL.clear();
+	COL.resize(0);
 	for(i=0;i<(int) V.size();i++){
 		COL.push_back(V[i]/M);
 	};
@@ -397,9 +414,9 @@ void rational_map::compute_Jacobian(){
 		dWdlambda.P = (P*Q) - (Wronskian(P,Q)*L);
 		dWdlambda.Q = L*L;
 		
-		L.a.clear();
+		L.a.resize(0);
 		
-		COL.clear();
+		COL.resize(0);
 		for(j=0;j<(int) C.size();j++){
 			z=dRdlambda.EVAL(C[j]);
 			w=dWdlambda.EVAL(C[j]);
@@ -425,8 +442,4 @@ void rational_map::compute_Jacobian(){
 	};
 	
 };
-
-void rational_map::compute_adjust_vector(){
-	ADJUST=invert_matrix(PERTURB, STEER);
-};	// how should we perturb Z, P, m to make V move in the direction STEER?
-
+*/
