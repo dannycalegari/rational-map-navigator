@@ -48,7 +48,6 @@ class rational_map{
 		void set_target_to_roots_of_unity();
 		void set_target_radius(int, double);
 		void set_target_argument(int, double);
-		void braid_V(int, int);					// braid V[i] from eta^i around eta^j and back
 
 		~rational_map(){};
 };
@@ -354,7 +353,7 @@ void rational_map::initialize_perturbation_matrix(){
 	for(i=0;i<(int) V.size();i++){
 		COL.push_back(0.0);
 	};
-	for(j=0;j<2*Zeros.size()+1;j++){
+	for(j=0;j<2*(int) Zeros.size()+1;j++){
 		PERTURB.push_back(COL);
 	};
 };

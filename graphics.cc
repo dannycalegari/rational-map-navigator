@@ -366,21 +366,7 @@ void rational_map::steer_to_target(){
 		adjust_C_and_V();
 		j++;
 	};
-};		
-
-void braid_critical_values(rational_map &R, int j, bool positive){
-	// assuming there are a pair of critical values at e^2pi.i.j/(2d-2) and e^2pi.i.(j+1)/(2d-2)
-	// it braids j around j+1 positively if positive==true and negatively otherwise
-	
-	int i;
-	complex<double> w, eta;
-	
-	w.real()=0;
-	w.imag()=TWOPI/(double) R.V.size();
-	eta=exp(w);	// 2d-2th root of unity
-
 };
-		
 
 void graphics_routine(rational_map &R, bool &finished){
 	// function stereo_point takes complex plane to disk of radius 2, stereographically
@@ -465,8 +451,7 @@ void graphics_routine(rational_map &R, bool &finished){
 				R.compute_monodromy();
 				while(1){
 					XNextEvent(display, &report);
-				//	if(report.type==KeyPress) {
-					if(report.type!=NULL){
+					if(report.type!=0){	// waiting to interrupt to outer loop
 						break;
 					};
 				};
