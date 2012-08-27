@@ -48,8 +48,6 @@ class rational_map{
 		void set_target_to_roots_of_unity();
 		void set_target_radius(int, double);
 		void set_target_argument(int, double);
-
-		~rational_map(){};
 };
 
 complex<double> rational_map::EVAL(complex<double> z){	// evaluate z

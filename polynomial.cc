@@ -32,8 +32,6 @@ class polynomial{
 
 		void compute_roots();			// determine roots r[*] from coefficients a[*]
 		void write();
-		
-		~polynomial(){ };	
 };
 
 int polynomial::degree(){
