@@ -223,12 +223,17 @@ void rational_map::draw_PZCV(){	// graphical output routine
 		p=complex_to_point(stereo_point(Poles[i]));
 		draw_thick_circle(p.x,p.y,1,(long) 0x0000FF);
 	};
+	
 	if(ZP=='Z'){
 		p=complex_to_point(stereo_point(Zeros[ZP_index]));
 	} else {
 		p=complex_to_point(stereo_point(Poles[ZP_index]));
 	};
 	draw_circle(p.x,p.y,6,(long) 0x000000);	// big circle around selected Z/P
+	
+	p=complex_to_point(stereo_point(V[V_index]));
+	p.x=p.x+640;
+	draw_circle(p.x,p.y,6,(long) 0x000000);	// big circle around selected V
 	
 	for(i=0;i<(int) C.size();i++){
 		p=complex_to_point(stereo_point(C[i]));
@@ -312,18 +317,14 @@ double norm(vector<complex<double> > v){
 	return(t);
 };
 
-void rational_map::steer_to_roots_of_unity(){
+void rational_map::steer_to_target(){
 	// adjusts zeros/poles to move critical values in a "straight" line to roots of unity
 	
 	int i,j;
 	complex<double> w, eta;
 	vector<complex<double> > PROX;
 	double SPEED;
-	
-	w.real()=0;
-	w.imag()=TWOPI/(double) V.size();
-	eta=exp(w);	// 2d-2th root of unity
-	
+
 	for(i=0;i<(int) V.size();i++){
 		PROX.push_back(1.0);
 	};
@@ -339,7 +340,7 @@ void rational_map::steer_to_roots_of_unity(){
 	//	};
 		
 		for(i=0;i<(int) V.size();i++){
-			PROX[i]=(((eta^i)-V[i]));
+			PROX[i]=((TARGET[i]-V[i]));
 			if(abs(PROX[i])<0.1){	// if close enough,
 				STEER[i]=PROX[i]/SPEED;
 			} else if(abs(PROX[i])<0.2){
@@ -395,8 +396,14 @@ void graphics_routine(rational_map &R, bool &finished){
 	switch (report.type) {
 		case ButtonPress:
 			p=mouse_location();
-			z=point_to_complex(p);
-			R.select_ZP(inverse_stereo(z));
+			if(p.x<640){
+				z=point_to_complex(p);
+				R.select_ZP(inverse_stereo(z));
+			} else {
+				p.x=p.x-640;
+				z=point_to_complex(p);
+				R.select_V(inverse_stereo(z));
+			};
 		case KeyPress:
 			if(XLookupKeysym(&report.xkey, 0) == XK_Right){		// adjust Z or P
 				z.real()=0.04;
@@ -466,7 +473,28 @@ void graphics_routine(rational_map &R, bool &finished){
 				break;
 			};
 			if(XLookupKeysym(&report.xkey, 0) == XK_s){		// steer to roots of unity
-				R.steer_to_roots_of_unity();
+				R.set_target_to_roots_of_unity();
+				R.steer_to_target();
+				break;
+			};
+			if(XLookupKeysym(&report.xkey, 0) == XK_a){
+				R.set_target_radius(R.V_index,abs(R.V[R.V_index])*1.2);
+				R.steer_to_target();
+				break;
+			};
+			if(XLookupKeysym(&report.xkey, 0) == XK_z){		
+				R.set_target_radius(R.V_index,abs(R.V[R.V_index])/1.2);
+				R.steer_to_target();
+				break;
+			};
+			if(XLookupKeysym(&report.xkey, 0) == XK_x){
+				R.set_target_argument(R.V_index,arg(R.V[R.V_index])+0.1);
+				R.steer_to_target();
+				break;
+			};
+			if(XLookupKeysym(&report.xkey, 0) == XK_c){
+				R.set_target_argument(R.V_index,arg(R.V[R.V_index])-0.1);
+				R.steer_to_target();
 				break;
 			};
 			if(XLookupKeysym(&report.xkey, 0) == XK_q){		// quit

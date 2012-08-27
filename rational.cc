@@ -89,6 +89,7 @@ int main(int argc, char *argv[]){
 	R.initialize_perturbation_matrix();
 	R.ZP='Z';	
 	R.ZP_index=0;
+	R.V_index=0;
 	
 	R.VF='X';	// initialize don't draw vector field
 	R.integral_curves=false;
@@ -105,6 +106,8 @@ int main(int argc, char *argv[]){
 	cout << "To toggle integral curves on/off, type [i] (warning: very slow!) \n";
 	cout << "Dial [m] for monodromy. \n";
 	cout << "To steer critical values to roots of unity, type [s]. (warning: experimental!) \n";
+	cout << "To push critical values out/in, type [a]/[z]. \n";
+	cout << "To rotate critical values positively/negatively, type [x]/[c]. \n";
 	cout << "To quit, type [q]. \n";
 	
 	while(finished==false){

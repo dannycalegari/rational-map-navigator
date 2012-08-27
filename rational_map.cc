@@ -9,13 +9,14 @@ class rational_map{
 		vector<complex<double> > C;		// critical points
 		vector<complex<double> > V;		// critical values
 		char ZP;		// is 'Z' for zero or 'P' for pole
-		int ZP_index;	// index of ZP
+		int ZP_index;	// index of selected Zero or Pole
+		int V_index;	// index of selected critical Value
 		char VF;		// is 'D' for derivative, 'N' for nonlinearity, 'S' for Schwarzian, and 'X' for none
 		bool integral_curves;	//
-		vector< vector<complex<double> > > PERTURB;		// perturbation matrix
-		vector< complex<double> > STEER;				// steer vector
-		vector<complex<double> > ADJUST;				// adjust vector
-			// this should satisfy PERTURB.ADJUST = STEER
+		vector<vector<complex<double> > > PERTURB;		// perturbation matrix; dV/d(Z,P,m)
+		vector<complex<double> > STEER;				// steer vector; which way should we move V?
+		vector<complex<double> > ADJUST;				// adjust vector; PERTURB.ADJUST = STEER
+		vector<complex<double> > TARGET;			// target vector; where should we move V to?
 
 		
 		complex<double> EVAL(complex<double> );		// evaluate function on complex number
@@ -32,6 +33,7 @@ class rational_map{
 		
 		void select_ZP(complex<double>);	// select closest zero/pole to given point
 		void adjust_ZP(complex<double>);	// move selected zero/pole by amount
+		void select_V(complex<double>);		// select closest critical value to given point
 		void draw_PZCV();					// graphical output routine
 		void output_data();					// output data to cout
 		
@@ -42,7 +44,10 @@ class rational_map{
 	//	void compute_Jacobian();				// better implementation of compute_perturbation_matrix()
 		void compute_adjust_vector();	// how should we perturb Z, P, m to make V move in the direction STEER?
 
-		void steer_to_roots_of_unity();		// adjust V in a straight line to roots of unity
+		void steer_to_target();			// adjust V in a straight line in the direction of TARGET
+		void set_target_to_roots_of_unity();
+		void set_target_radius(int, double);
+		void set_target_argument(int, double);
 		void braid_V(int, int);					// braid V[i] from eta^i around eta^j and back
 
 		~rational_map(){};
@@ -251,6 +256,21 @@ void rational_map::adjust_ZP(complex<double> z){
 	adjust_C_and_V();
 };
 
+void rational_map::select_V(complex<double> z){	// finds critical value closest to z, and sets the value of V_index
+	complex<double> w;
+	double dist;
+	int i;
+//	cout << "finding closest zero/pole to " << z.real() << " + " << z.imag() << " i\n";
+	V_index=0;
+	dist=norm(z-V[0]);
+	for(i=0;i<(int) V.size();i++){
+		if(norm(z-V[i])<dist){
+			V_index=i;
+			dist=norm(z-V[i]);
+		};
+	};
+};
+
 void rational_map::output_data(){					// output data to cout
 	int i;
 	cout << "rational map has the form m.(z-z_0)(z-z_1)...(z-z_{d-1})/(z-p_0)...(z-p_{d-1})\n";
@@ -388,6 +408,31 @@ void rational_map::compute_adjust_vector(){
 	ADJUST=invert_matrix(PERTURB, STEER);
 };	// how should we perturb Z, P, m to make V move in the direction STEER?
 
+
+void rational_map::set_target_to_roots_of_unity(){	// useful to put V in a standard location
+	complex<double> w, eta;
+	int i;
+	
+	TARGET.resize(0);
+	w.real()=0;
+	w.imag()=TWOPI/(double) V.size();
+	eta=exp(w);	// 2d-2th root of unity
+	for(i=0;i<(int) V.size();i++){
+		TARGET.push_back(eta^i);
+	};
+};
+
+void rational_map::set_target_radius(int i, double t){	// adjusts TARGET[i] to t*TARGET[i]/abs(TARGET[i])
+	TARGET[i]=t*TARGET[i]/abs(TARGET[i]);
+};
+
+void rational_map::set_target_argument(int i, double t){ // adjusts TARGET[i] to e^{it}abs(TARGET[i])
+	complex<double> I;
+	I.real()=0.0;
+	I.imag()=1.0;
+	TARGET[i]=abs(TARGET[i])*exp(t*I);
+};
+	
 /*
 void rational_map::compute_Jacobian(){
 	// experimental; seems buggy
