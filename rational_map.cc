@@ -364,16 +364,17 @@ void rational_map::compute_perturbation_matrix(){ 	// how perturbing Z, P and m 
 
 	int i,j;
 	complex<double> z,w;
-	vector<complex<double> > COL; 	
+	vector<complex<double> > COL,VV; 	
 	
-	COL=V;
+	VV=V;
+	COL=VV;
 	for(i=0;i<(int) V.size();i++){
 		COL[i]=V[i]/M;
 	};
 	PERTURB[0]=COL;		// derivative of V with respect to M
 	
 	for(i=0;i<(int) Zeros.size();i++){
-		COL=V;
+		COL=VV;
 		Zeros[i]=Zeros[i]+0.0001;
 		compute_coefficients();
 		adjust_C_and_V();
@@ -381,13 +382,12 @@ void rational_map::compute_perturbation_matrix(){ 	// how perturbing Z, P and m 
 			COL[j]=(V[j]-COL[j])/0.0001;	// approximate derivative
 		};
 		Zeros[i]=Zeros[i]-0.0001;
-		compute_coefficients();
-		adjust_C_and_V();
+//		compute_coefficients();		this is just *stupid*
+//		adjust_C_and_V();
 		PERTURB[i+1]=COL;	// derivative of V with respect to Z[i]
 	};
 	for(i=0;i<(int) Poles.size();i++){
-
-		COL=V;
+		COL=VV;
 		Poles[i]=Poles[i]+0.0001;
 		compute_coefficients();
 		adjust_C_and_V();
@@ -395,10 +395,12 @@ void rational_map::compute_perturbation_matrix(){ 	// how perturbing Z, P and m 
 			COL[j]=(V[j]-COL[j])/0.0001;	// approximate derivative
 		};
 		Poles[i]=Poles[i]-0.0001;
-		compute_coefficients();
-		adjust_C_and_V();
+//		compute_coefficients();
+//		adjust_C_and_V();
 		PERTURB[i+Zeros.size()+1]=COL;	// derivative of V with respect to P[i]
 	};
+	compute_coefficients();
+	adjust_C_and_V();
 };
 
 void rational_map::compute_adjust_vector(){
