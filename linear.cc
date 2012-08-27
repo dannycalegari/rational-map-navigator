@@ -1,6 +1,19 @@
 /* linear.cc linear algebra operations */
 
-
+int closest_entry(vector<complex<double> > V, complex<double> z){	
+	// returns i minimizing abs(V[i]-z)
+	int i,j;
+	double t;
+	i=0;
+	t=abs(V[0]-z);
+	for(j=0;j<(int) V.size();j++){
+		if(abs(V[j]-z)<t){
+			i=j;
+			t=abs(V[j]-z);
+		};
+	};
+	return(i);
+};
 	
 vector<complex<double> >  mul_matrix(vector< vector<complex<double> > > N, vector<complex<double> > v){
 	// returns vector Nv
@@ -8,9 +21,9 @@ vector<complex<double> >  mul_matrix(vector< vector<complex<double> > > N, vecto
 	complex<double> z;
 	int i,j;
 	w.clear();
-	for(i=0;i<N[0].size();i++){
+	for(i=0;i<(int) N[0].size();i++){
 		z=0.0;
-		for(j=0;j<N.size();j++){
+		for(j=0;j<(int) N.size();j++){
 			z=z+N[j][i]*v[j];
 		};
 		w.push_back(z);
@@ -47,7 +60,7 @@ vector<complex<double> >  invert_matrix(vector< vector<complex<double> > > N, ve
 	cols=M.size();		// note! cols>rows!
 	
 	vector< vector<complex<double> > > U;	// matrix
-	for(j=0;j<cols;j++){
+	for(j=0;j<cols;j++){	// initialize U to the identity matrix
 		w.clear();
 		for(i=0;i<cols;i++){
 			w.push_back(0.0);

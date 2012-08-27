@@ -55,7 +55,7 @@ int main(int argc, char *argv[]){
 	complex<double> I (0.0,1.0);
 	polynomial P,Q;
 	rational_map R,S;
-	int d,i,j;
+	int d,i;
 	bool finished;
 	
 	m=1.0;
@@ -73,14 +73,13 @@ int main(int argc, char *argv[]){
 	for(i=0;i<d;i++){
 		roots.push_back(eta^(2*i));
 	};
-	roots[roots.size()-1]=-0.5;
-	roots[roots.size()-2]=0.5;
+	roots[0]=-5.0;
 	R.Zeros=roots;
 	roots.clear();
 	for(i=0;i<d;i++){
 		roots.push_back(eta^(2*i+1));
 	};
-	roots[roots.size()-1]=3.0;
+	roots[0]=5.0;
 	R.Poles=roots;
 	R.M=m;
 

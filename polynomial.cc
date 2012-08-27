@@ -9,7 +9,7 @@ class polynomial{
 		complex<double> operator()(complex<double> z){		// want to be able to write P(z)
 			int i;	
 			complex<double> w (0.0,0.0);
-			for(i=a.size()-1;i>=0;i--){
+			for(i=(int) a.size()-1;i>=0;i--){
 				w=(w*z) + a[i];
 			};
 			return(w);
@@ -17,7 +17,7 @@ class polynomial{
 		complex<double> EVAL(complex<double> z){	// want to be able to write EVAL(z) in internal functions
 			int i;	
 			complex<double> w (0.0,0.0);
-			for(i=a.size()-1;i>=0;i--){
+			for(i=(int) a.size()-1;i>=0;i--){
 				w=(w*z) + a[i];
 			};
 			return(w);		
@@ -147,14 +147,14 @@ void polynomial::compute_coefficients(){		// determine coefficients a[*] from ro
 	int i;
 	P.a.clear();	// first, clear coefficients
 	P.a.push_back(1.0);	// initialize to the constant polynomial 1
-	for(i=0;i<r.size();i++){	// for each root
+	for(i=0;i<(int) r.size();i++){	// for each root
 		L.a.clear();
 		L.a.push_back(-r[i]);
 		L.a.push_back(1.0);		// L = (z-r[i])
 		P=P*L;
 	};
 	a.clear();
-	for(i=0;i<P.a.size();i++){
+	for(i=0;i<(int) P.a.size();i++){
 		a.push_back(m*P.a[i]);
 	};
 };
@@ -164,7 +164,7 @@ polynomial make_polynomial(vector<complex<double> > r, complex<double> m){	// re
 	int i;
 	P.m=m;
 	P.r.clear();
-	for(i=0;i<r.size();i++){
+	for(i=0;i<(int) r.size();i++){
 		P.r.push_back(r[i]);
 	};
 	P.a.clear();
@@ -245,7 +245,7 @@ complex<double> polynomial::closest_root(complex<double> z){	// compares roots t
 	double closest_dist;
 	closest=0;
 	closest_dist=abs(r[0]-z);
-	for(i=0;i<r.size();i++){
+	for(i=0;i<(int) r.size();i++){
 		if(abs(r[i]-z)<closest_dist){
 			closest=i;
 			closest_dist=abs(r[closest]-z);
@@ -260,7 +260,7 @@ void polynomial::compute_roots(){
 	int i;
 	r.clear();	// clear list of roots
 	R.a.clear();
-	for(i=0;i<a.size();i++){
+	for(i=0;i<(int) a.size();i++){
 		R.a.push_back(a[i]);
 	};
 	while(R.degree()>0){

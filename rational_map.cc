@@ -38,6 +38,8 @@ class rational_map{
 		void compute_monodromy();			// compute monodromy around critical values along ``standard contours''
 
 		void compute_perturbation_matrix();		// how perturbing Z, P and m affects V
+		void compute_Jacobian();				// better implementation of compute_perturbation_matrix()
+			
 		void compute_adjust_vector();	// how should we perturb Z, P, m to make V move in the direction STEER?
 };
 
@@ -74,7 +76,7 @@ void rational_map::compute_C_and_V(){	// compute for the first time
 	W.compute_roots();	// these are the critical points of P/Q
 	C.clear();
 	V.clear();
-	for(i=0;i<W.r.size();i++){
+	for(i=0;i<(int) W.r.size();i++){
 		C.push_back(W.r[i]);
 		V.push_back(EVAL(W.r[i]));
 	};
@@ -82,16 +84,19 @@ void rational_map::compute_C_and_V(){	// compute for the first time
 
 void rational_map::adjust_C_and_V(){	// adjust values, tracking critical points
 	polynomial W;
-	int i;
+	int i,j;
 	complex<double> z;
 	W=Wronskian(P,Q);
 	W.compute_roots();	// these are the critical points of P/Q
-	for(i=0;i<C.size();i++){
-		z=W.closest_root(C[i]);	// numerically search for closest root
-//		cout << abs(C[i]-z) << " ";
-		C[i]=z;
-//		cout << abs(V[i]-EVAL(z)) << "\n";
-		V[i]=EVAL(z);
+	for(i=0;i<(int) C.size();i++){
+		j=closest_entry(W.r,C[i]);	// closest_entry is defined in linear.cc
+		C[i]=W.r[j];
+		V[i]=EVAL(C[i]);
+		W.r.erase(W.r.begin()+j);	// remove this from list of roots
+
+		/* WARNING: finding closest root numerically can (and does) easily lead to
+		errors when critical points are too close. It is worth checking the monodromy
+		periodically to make sure critical points have not jumped. */
 	};
 };
 
@@ -206,13 +211,13 @@ void rational_map::select_ZP(complex<double> z){	// finds zero or pole closest t
 	ZP='Z';
 	ZP_index=0;
 	dist=norm(z-Zeros[0]);
-	for(i=0;i<Zeros.size();i++){
+	for(i=0;i<(int) Zeros.size();i++){
 		if(norm(z-Zeros[i])<dist){
 			ZP_index=i;
 			dist=norm(z-Zeros[i]);
 		};
 	};
-	for(i=0;i<Poles.size();i++){
+	for(i=0;i<(int) Poles.size();i++){
 		if(norm(z-Poles[i])<dist){
 			ZP='P';
 			ZP_index=i;
@@ -244,17 +249,17 @@ void rational_map::adjust_ZP(complex<double> z){
 void rational_map::output_data(){					// output data to cout
 	int i;
 	cout << "rational map has the form m.(z-z_0)(z-z_1)...(z-z_{d-1})/(z-p_0)...(z-p_{d-1})\n";
-	for(i=0;i<Zeros.size();i++){
+	for(i=0;i<(int) Zeros.size();i++){
 		cout << "zero z_" << i << " is " << Zeros[i].real() << " + " << Zeros[i].imag() << " i\n";
 	};
-	for(i=0;i<Poles.size();i++){
+	for(i=0;i<(int) Poles.size();i++){
 		cout << "pole p_" << i << " is " << Poles[i].real() << " + " << Poles[i].imag() << " i\n";
 	};
 	cout << "multiplier m is " << M.real() << " + " << M.imag() << "\n";
-	for(i=0;i<C.size();i++){
+	for(i=0;i<(int) C.size();i++){
 		cout << "critical point " << i << " is " << C[i].real() << " + " << C[i].imag() << " i\n";
 	};
-	for(i=0;i<V.size();i++){
+	for(i=0;i<(int) V.size();i++){
 		cout << "critical value " << i << " is " << V[i].real() << " + " << V[i].imag() << " i\n";
 	};
 };
@@ -279,7 +284,7 @@ void rational_map::compute_monodromy(){			// compute monodromy around critical v
 
 	cout << "computing monodromy.\n";
 
-	for(i=0;i<C.size();i++){	// ith critical value
+	for(i=0;i<(int) C.size();i++){	// ith critical value
 		v=V[i];
 		cout << "critical value " << i << " = " << v.real() << " + " << v.imag() << " i\n";
 		cout << "monodromy permutation: ";
@@ -328,31 +333,89 @@ void rational_map::compute_perturbation_matrix(){ 	// how perturbing Z, P and m 
 	complex<double> z,w;
 	vector<complex<double> > COL; 	
 	PERTURB.clear();
-	PERTURB.push_back(V);			// derivative of V with respect to M
-
-//	for(i=0;i<Zeros.size()-2;i++){
-	for(i=0;i<Zeros.size();i++){
-
+	
+	COL.clear();
+	for(i=0;i<(int) V.size();i++){
+		COL.push_back(V[i]/M);
+	};
+	PERTURB.push_back(COL);			// derivative of V with respect to M
+	COL.clear();
+	
+	for(i=0;i<(int) Zeros.size();i++){
 		COL=V;
-		Zeros[i]=Zeros[i]+0.0001;
+		Zeros[i]=Zeros[i]+0.001;
 		compute_coefficients();
 		adjust_C_and_V();
-		for(j=0;j<V.size();j++){
-			COL[j]=(V[j]-COL[j])/0.0001;	// approximate derivative
+		for(j=0;j<(int) V.size();j++){
+			COL[j]=(V[j]-COL[j])/0.001;	// approximate derivative
 		};
-		Zeros[i]=Zeros[i]-0.0001;
+		Zeros[i]=Zeros[i]-0.001;
 		compute_coefficients();
 		adjust_C_and_V();
 		PERTURB.push_back(COL);		// derivative of V with respect to Z[i]
 	};
-//	for(i=0;i<Poles.size()-1;i++){
-	for(i=0;i<Poles.size();i++){
+	for(i=0;i<(int) Poles.size();i++){
 
+		COL=V;
+		Poles[i]=Poles[i]+0.001;
+		compute_coefficients();
+		adjust_C_and_V();
+		for(j=0;j<(int) V.size();j++){
+			COL[j]=(V[j]-COL[j])/0.001;	// approximate derivative
+		};
+		Poles[i]=Poles[i]-0.001;
+		compute_coefficients();
+		adjust_C_and_V();
+		PERTURB.push_back(COL);		// derivative of V with respect to P[i]
+	};
+};
+
+void rational_map::compute_Jacobian(){
+	// experimental; seems buggy
+	int i,j;
+	complex<double> z,w;
+	vector<complex<double> > COL;
+	PERTURB.clear();
+	rational_map dRdlambda, dWdlambda;
+	polynomial L;
+	L.a.clear();
+
+	
+	COL.clear();
+	for(i=0;i<(int) V.size();i++){
+		COL.push_back(V[i]/M);
+	};
+	PERTURB.push_back(COL);			// derivative of V with respect to M
+
+	for(i=0;i<(int) Zeros.size();i++){
+		L.a.push_back(-Zeros[i]);		// L = (z-z_i)
+		L.a.push_back(1.0);
+		
+		dRdlambda.P = P*(-1.0);		// defining dR/dlambda
+		dRdlambda.Q = Q*L;
+		
+		dWdlambda.P = (P*Q) - (Wronskian(P,Q)*L);
+		dWdlambda.Q = L*L;
+		
+		L.a.clear();
+		
+		COL.clear();
+		for(j=0;j<(int) C.size();j++){
+			z=dRdlambda.EVAL(C[j]);
+			w=dWdlambda.EVAL(C[j]);
+			w=-w/((Wronskian(P,Q)).D()).EVAL(C[j]);
+			z=z+w;
+			COL.push_back(z);
+		};
+		PERTURB.push_back(COL);		// derivative of V with respect to Zeros[i]
+	};
+
+	for(i=0;i<(int) Poles.size();i++){
 		COL=V;
 		Poles[i]=Poles[i]+0.0001;
 		compute_coefficients();
 		adjust_C_and_V();
-		for(j=0;j<V.size();j++){
+		for(j=0;j<(int) V.size();j++){
 			COL[j]=(V[j]-COL[j])/0.0001;	// approximate derivative
 		};
 		Poles[i]=Poles[i]-0.0001;
@@ -360,6 +423,7 @@ void rational_map::compute_perturbation_matrix(){ 	// how perturbing Z, P and m 
 		adjust_C_and_V();
 		PERTURB.push_back(COL);		// derivative of V with respect to P[i]
 	};
+	
 };
 
 void rational_map::compute_adjust_vector(){

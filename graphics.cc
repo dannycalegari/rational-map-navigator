@@ -215,11 +215,11 @@ void rational_map::draw_PZCV(){	// graphical output routine
 			break;
 	};
 
-	for(i=0;i<Zeros.size();i++){
+	for(i=0;i<(int) Zeros.size();i++){
 		p=complex_to_point(stereo_point(Zeros[i]));
 		draw_thick_circle(p.x,p.y,1,(long) 0xFF0000);
 	};
-	for(i=0;i<Poles.size();i++){
+	for(i=0;i<(int) Poles.size();i++){
 		p=complex_to_point(stereo_point(Poles[i]));
 		draw_thick_circle(p.x,p.y,1,(long) 0x0000FF);
 	};
@@ -230,7 +230,7 @@ void rational_map::draw_PZCV(){	// graphical output routine
 	};
 	draw_circle(p.x,p.y,6,(long) 0x000000);	// big circle around selected Z/P
 	
-	for(i=0;i<C.size();i++){
+	for(i=0;i<(int) C.size();i++){
 		p=complex_to_point(stereo_point(C[i]));
 		draw_thick_circle(p.x,p.y,1,(long) 0x00FF00);
 		T << i;
@@ -238,7 +238,7 @@ void rational_map::draw_PZCV(){	// graphical output routine
 		XDrawString(display,win,gc,p.x+3,p.y-3,S.c_str(),strlen(S.c_str()));
 		T.str("");
 	};
-	for(i=0;i<V.size();i++){
+	for(i=0;i<(int) V.size();i++){
 		p=complex_to_point(stereo_point(V[i]));
 		p.x=p.x+640;
 		draw_thick_circle(p.x,p.y,1,(long) 0x3377AA);
@@ -306,7 +306,7 @@ double norm(vector<complex<double> > v){
 	int i;
 	double t;
 	t=0;
-	for(i=0;i<v.size();i++){
+	for(i=0;i<(int) v.size();i++){
 		t=t+abs(v[i]);
 	};
 	return(t);
@@ -317,38 +317,55 @@ void steer_to_roots_of_unity(rational_map &R){
 	
 	int i,j;
 	complex<double> w, eta;
+	vector<complex<double> > PROX;
+	double SPEED;
 	
 	w.real()=0;
 	w.imag()=TWOPI/(double) R.V.size();
 	eta=exp(w);	// 2d-2th root of unity
-
+	
 	R.STEER.clear();
-	for(i=0;i<R.V.size();i++){
-		R.STEER.push_back(0.1*((eta^i)-R.V[i]));
+	PROX.clear();
+	
+	for(i=0;i<(int) R.V.size();i++){
+		PROX.push_back(1.0);
 	};
 	
-	j=0;
-	while(norm(R.STEER)>0.1){
-		if(j%20==0){
+//	j=0;
+	SPEED=0.03;
+	R.STEER=PROX;
+	while(norm(PROX)>0.01){
+	//	if(j%20==0){
 			erase_field();
 			R.draw_PZCV();
 			XFlush(display);
-		};
+	//	};
 		
-		for(i=0;i<R.V.size();i++){
-			R.STEER[i]=(0.1*((eta^i)-R.V[i]));
+		for(i=0;i<(int) R.V.size();i++){
+			PROX[i]=(((eta^i)-R.V[i]));
+			if(abs(PROX[i])<0.1){	// if close enough,
+				R.STEER[i]=PROX[i]/SPEED;
+			} else if(abs(PROX[i])<0.2){
+				R.STEER[i]=PROX[i]*5.0;
+			} else	{
+				R.STEER[i]=PROX[i]*(1.0+ 1.0/abs(PROX[i]));
+				if(abs(R.STEER[i])>10.0){	// absolute speed limit
+					R.STEER[i]=R.STEER[i]*10.0/abs(R.STEER[i]);
+				};
+			};
 		};		
 		R.compute_perturbation_matrix();
 		R.compute_adjust_vector();
-		R.M=R.M+0.02*R.ADJUST[0];
-		for(i=0;i<R.Zeros.size();i++){
-			R.Zeros[i]=R.Zeros[i]+0.02*R.ADJUST[i+1];
+		R.M=R.M+SPEED*R.ADJUST[0];
+		for(i=0;i<(int) R.Zeros.size();i++){
+			R.Zeros[i]=R.Zeros[i]+SPEED*R.ADJUST[i+1];
 		};
-		for(i=0;i<R.Poles.size();i++){
-			R.Poles[i]=R.Poles[i]+0.02*R.ADJUST[i+R.Zeros.size()+1];
+		for(i=0;i<(int) R.Poles.size();i++){
+			R.Poles[i]=R.Poles[i]+SPEED*R.ADJUST[i+R.Zeros.size()+1];
 		};
 		R.compute_coefficients();
 		R.adjust_C_and_V();
+//		j++;
 	};
 };		
 
