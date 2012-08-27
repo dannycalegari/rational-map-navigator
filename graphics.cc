@@ -318,7 +318,7 @@ double norm(vector<complex<double> > v){
 };
 
 void rational_map::steer_to_target(){
-	// adjusts zeros/poles to move critical values in a "straight" line to roots of unity
+	// adjusts zeros/poles to move critical values in a "straight" line to TARGET
 	
 	int i,j;
 	complex<double> w, eta;
@@ -330,7 +330,7 @@ void rational_map::steer_to_target(){
 	};
 	
 	j=0;
-	SPEED=0.03;
+	SPEED=0.03;		// fast but buggy; what is a good speed?
 	STEER=PROX;
 	while(norm(PROX)>0.01){
 		if(j%4==0){
@@ -352,7 +352,7 @@ void rational_map::steer_to_target(){
 				};
 			};
 		};		
-		compute_perturbation_matrix();
+		compute_Jacobian();
 		compute_adjust_vector();
 		M=M+SPEED*ADJUST[0];
 		for(i=0;i<(int) Zeros.size();i++){

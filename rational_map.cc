@@ -15,7 +15,7 @@ class rational_map{
 		bool integral_curves;	//
 		vector<vector<complex<double> > > PERTURB;		// perturbation matrix; dV/d(Z,P,m)
 		vector<complex<double> > STEER;				// steer vector; which way should we move V?
-		vector<complex<double> > ADJUST;				// adjust vector; PERTURB.ADJUST = STEER
+		vector<complex<double> > ADJUST;				// adjust vector; PERTURB(ADJUST) = STEER
 		vector<complex<double> > TARGET;			// target vector; where should we move V to?
 
 		
@@ -40,9 +40,9 @@ class rational_map{
 		void compute_monodromy();			// compute monodromy around critical values along ``standard contours''
 
 		void initialize_perturbation_matrix();
-		void compute_perturbation_matrix();		// how perturbing Z, P and m affects V
-	//	void compute_Jacobian();				// better implementation of compute_perturbation_matrix()
-		void compute_adjust_vector();	// how should we perturb Z, P, m to make V move in the direction STEER?
+		void compute_secant();			// original version of compute_Jacobian 
+		void compute_Jacobian();		// computes matrix PERTURB:=dV/d(m,Z,P) 
+		void compute_adjust_vector();	// solves PERTURB(ADJUST)=STEER for ADJUST
 
 		void steer_to_target();			// adjust V in a straight line in the direction of TARGET
 		void set_target_to_roots_of_unity();
@@ -356,54 +356,8 @@ void rational_map::initialize_perturbation_matrix(){
 	};
 };
 
-void rational_map::compute_perturbation_matrix(){ 	// how perturbing Z, P and m affects V
-	/* This is a terrible implementation. needs to be much faster and more intelligent. 
-	It's main drawback is that it computes secant approximations to the Jacobian, rather than 
-	the true Jacobian. In fact, there is a (slightly messy, but elementary) closed formula
-	for the actual Jacobian in terms of P and Q, and I should just implement that. */
 
-	int i,j;
-	complex<double> z,w;
-	vector<complex<double> > COL,VV; 	
-	
-	VV=V;
-	COL=VV;
-	for(i=0;i<(int) V.size();i++){
-		COL[i]=V[i]/M;
-	};
-	PERTURB[0]=COL;		// derivative of V with respect to M
-	
-	for(i=0;i<(int) Zeros.size();i++){
-		COL=VV;
-		Zeros[i]=Zeros[i]+0.0001;
-		compute_coefficients();
-		adjust_C_and_V();
-		for(j=0;j<(int) V.size();j++){
-			COL[j]=(V[j]-COL[j])/0.0001;	// approximate derivative
-		};
-		Zeros[i]=Zeros[i]-0.0001;
-//		compute_coefficients();		this is just *stupid*
-//		adjust_C_and_V();
-		PERTURB[i+1]=COL;	// derivative of V with respect to Z[i]
-	};
-	for(i=0;i<(int) Poles.size();i++){
-		COL=VV;
-		Poles[i]=Poles[i]+0.0001;
-		compute_coefficients();
-		adjust_C_and_V();
-		for(j=0;j<(int) V.size();j++){
-			COL[j]=(V[j]-COL[j])/0.0001;	// approximate derivative
-		};
-		Poles[i]=Poles[i]-0.0001;
-//		compute_coefficients();
-//		adjust_C_and_V();
-		PERTURB[i+Zeros.size()+1]=COL;	// derivative of V with respect to P[i]
-	};
-	compute_coefficients();
-	adjust_C_and_V();
-};
-
-void rational_map::compute_adjust_vector(){
+void rational_map::compute_adjust_vector(){ // solves PERTURB(ADJUST)=STEER for ADJUST
 	ADJUST=invert_matrix(PERTURB, STEER);
 };	// how should we perturb Z, P, m to make V move in the direction STEER?
 
@@ -431,61 +385,98 @@ void rational_map::set_target_argument(int i, double t){ // adjusts TARGET[i] to
 	I.imag()=1.0;
 	TARGET[i]=abs(TARGET[i])*exp(t*I);
 };
-	
-/*
+
 void rational_map::compute_Jacobian(){
-	// experimental; seems buggy
+	/* For each zero z_i we form a new 2-variable function R(z,l)=R(z-l)/(z-z_i) such that when
+	l=z_i we get R(z). Basically, we make the constant z_i into a variable l.
+	We also form W(z,l) = Wronskian(P(z-l),Q(z-z_i)) which vanishes at l=z_i when W(z) does.
+	
+	Then R(c+d,z_i+e) = R(c,z_i) + d dR/dz(c,z_i) + e dR/dl(c,z_i) + quadratic terms.
+	Also, W(c+d,z_i+e) = W(c,z_i) + d dW/dz(c,z_i) + e dW/dl(c,z_i) + quadratic terms, so
+	if we want W(c+d,z_i+e) = 0 + quadratic terms, we must have d = -e (dW/dl)/(dW/dz)[c,z_i].
+	Hence the derivative dv/dl(z_i), where v(l)=R(c(l)), and c(l) is the zero of W(*,l) near c, is
+	dR/dl - (dW/dl)*(dR/dz)/(dW/dz) evaluated at c,z_i.
+	Explicitly, this is PQR'/W'(c-z_i)^2 - R/(c-z_i).
+	
+	For each pole p_i we form R(z,l) = R(z-p_i)/(z-l) and W(z,l) = Wr(P(z-p_i),Q(z-l)). We get
+	a corresponding formula R/(c-p_i) - PQR'/W'(c-p_i)^2.	*/
+	
 	int i,j;
 	complex<double> z,w;
 	vector<complex<double> > COL;
 	PERTURB.resize(0);
-	rational_map dRdlambda, dWdlambda;
-	polynomial L;
-	L.a.resize(0);
-
+	polynomial W;
+	W=Wronskian(P,Q);
 	
-	COL.resize(0);
+	COL=V;
 	for(i=0;i<(int) V.size();i++){
-		COL.push_back(V[i]/M);
+		COL[i]=V[i]/M;
 	};
 	PERTURB.push_back(COL);			// derivative of V with respect to M
 
-	for(i=0;i<(int) Zeros.size();i++){
-		L.a.push_back(-Zeros[i]);		// L = (z-z_i)
-		L.a.push_back(1.0);
-		
-		dRdlambda.P = P*(-1.0);		// defining dR/dlambda
-		dRdlambda.Q = Q*L;
-		
-		dWdlambda.P = (P*Q) - (Wronskian(P,Q)*L);
-		dWdlambda.Q = L*L;
-		
-		L.a.resize(0);
-		
-		COL.resize(0);
+	for(i=0;i<(int) Zeros.size();i++){	// correct analytic formula for derivative
 		for(j=0;j<(int) C.size();j++){
-			z=dRdlambda.EVAL(C[j]);
-			w=dWdlambda.EVAL(C[j]);
-			w=-w/((Wronskian(P,Q)).D()).EVAL(C[j]);
-			z=z+w;
-			COL.push_back(z);
+			w=P.EVAL(C[j])*Q.EVAL(C[j])*(D()).EVAL(C[j])/((W.D()).EVAL(C[j])*(C[j]-Zeros[i])*(C[j]-Zeros[i]));
+			w=w-EVAL(C[j])/(C[j]-Zeros[i]);
+			COL[j]=w;
+		};
+		PERTURB.push_back(COL);	
+	};
+
+	for(i=0;i<(int) Poles.size();i++){	// correct analytic formula for derivative (or do I have a sign error?)
+		for(j=0;j<(int) C.size();j++){
+			w=P.EVAL(C[j])*Q.EVAL(C[j])*(D()).EVAL(C[j])/((W.D()).EVAL(C[j])*(C[j]-Poles[i])*(C[j]-Poles[i]));
+			w=w-EVAL(C[j])/(C[j]-Poles[i]);
+			COL[j]=-w;
 		};
 		PERTURB.push_back(COL);		// derivative of V with respect to Zeros[i]
 	};
+};
 
-	for(i=0;i<(int) Poles.size();i++){
-		COL=V;
-		Poles[i]=Poles[i]+0.0001;
+void rational_map::compute_secant(){ 	// how perturbing Z, P and m affects V
+	/* original version; computed approximation to Jacobian by secants; reasonably accurate,
+	but very slow, because computing new values of C and V after adjusting each variable
+	depends on finding a new set of roots for the new Wronskian, via Newton's method, which
+	doesn't always converge quickly. 	*/
+
+	int i,j;
+	complex<double> z,w;
+	vector<complex<double> > COL,VV; 	
+	
+	VV=V;
+	COL=VV;
+	for(i=0;i<(int) V.size();i++){
+		COL[i]=V[i]/M;
+	};
+	PERTURB[0]=COL;		// derivative of V with respect to M
+	
+	for(i=0;i<(int) Zeros.size();i++){
+		COL=VV;
+		Zeros[i]=Zeros[i]+0.000001;
 		compute_coefficients();
 		adjust_C_and_V();
 		for(j=0;j<(int) V.size();j++){
-			COL[j]=(V[j]-COL[j])/0.0001;	// approximate derivative
+			COL[j]=(V[j]-COL[j])/0.000001;	// approximate derivative
 		};
-		Poles[i]=Poles[i]-0.0001;
+		Zeros[i]=Zeros[i]-0.000001;
+//		compute_coefficients();		this is just *stupid*
+//		adjust_C_and_V();
+		PERTURB[i+1]=COL;	// derivative of V with respect to Z[i]
+	};
+	for(i=0;i<(int) Poles.size();i++){
+		COL=VV;
+		Poles[i]=Poles[i]+0.000001;
 		compute_coefficients();
 		adjust_C_and_V();
-		PERTURB.push_back(COL);		// derivative of V with respect to P[i]
+		for(j=0;j<(int) V.size();j++){
+			COL[j]=(V[j]-COL[j])/0.000001;	// approximate derivative
+		};
+		Poles[i]=Poles[i]-0.000001;
+//		compute_coefficients();
+//		adjust_C_and_V();
+		PERTURB[i+Zeros.size()+1]=COL;	// derivative of V with respect to P[i]
 	};
-	
+	compute_coefficients();
+	adjust_C_and_V();
 };
-*/
+
