@@ -1,0 +1,209 @@
+/* examples.txt 
+
+Examples of rational maps of low degree with critical values equal to roots of unity, and
+with zeros/poles nicely spread out (good initial values)
+
+*/
+
+degree 3
+
+zero z_0 is -5 + 0 i
+zero z_1 is -0.252618 + 0.863879 i
+zero z_2 is -0.245935 + -0.258571 i
+pole p_0 is 5 + 0 i
+pole p_1 is -1.83266 + 0.259504 i
+pole p_2 is -0.183196 + 0.299233 i
+multiplier m is 1.49933 + -0.152832
+critical point 0 is -0.652578 + 0.294548 i
+critical point 1 is -1.29468 + -1.74548 i
+critical point 2 is 0.399336 + 0.29773 i
+critical point 3 is -1.42956 + 2.4033 i
+critical value 0 is 1 + 2.03524e-07 i
+critical value 1 is -3.15634e-08 + 1 i
+critical value 2 is -1 + -1.93407e-07 i
+critical value 3 is -4.40138e-08 + -1 i
+
+
+degree 4
+
+zero z_0 is -5 + 0 i
+zero z_1 is 0.113027 + 0.903659 i
+zero z_2 is -0.257516 + -0.405441 i
+zero z_3 is 0.532981 + 0.398525 i
+pole p_0 is 5 + 0 i
+pole p_1 is -1.69135 + 0.078451 i
+pole p_2 is 0.103954 + 0.0794768 i
+pole p_3 is 0.417455 + 0.664228 i
+multiplier m is 1.27324 + 0.628684
+critical point 0 is -0.443872 + 0.294859 i
+critical point 1 is 0.236458 + 0.485821 i
+critical point 2 is -1.20446 + -1.89912 i
+critical point 3 is 0.603508 + -0.261153 i
+critical point 4 is 0.76741 + 0.859571 i
+critical point 5 is -1.14008 + 2.29843 i
+critical value 0 is 1 + 5.00998e-08 i
+critical value 1 is 0.499999 + 0.866025 i
+critical value 2 is -0.5 + 0.866025 i
+critical value 3 is -1 + 6.28395e-08 i
+critical value 4 is -0.5 + -0.866025 i
+critical value 5 is 0.5 + -0.866025 i
+
+
+degree 5
+
+zero z_0 is -1.53956 + -1.75476 i
+zero z_1 is 2.4672 + -2.2258 i
+zero z_2 is -0.791263 + 2.2286 i
+zero z_3 is 0.447384 + 2.44965 i
+zero z_4 is 2.22009 + 7.62996 i
+pole p_0 is 1.86794 + -3.63415 i
+pole p_1 is 2.10015 + 0.317801 i
+pole p_2 is -0.318458 + 3.99167 i
+pole p_3 is 0.259632 + 2.36904 i
+pole p_4 is -2.73183 + -0.293516 i
+multiplier m is 0.421887 + -0.562912
+critical point 0 is -2.84753 + 3.48144 i
+critical point 1 is 0.944187 + -1.85851 i
+critical point 2 is -0.686909 + 0.186328 i
+critical point 3 is 0.400308 + 1.90117 i
+critical point 4 is 1.39631 + 3.0958 i
+critical point 5 is 0.0797792 + 2.7418 i
+critical point 6 is 5.1768 + -1.9943 i
+critical point 7 is -4.81135 + -5.5554 i
+critical value 0 is 1 + -8.69626e-08 i
+critical value 1 is 0.707107 + 0.707107 i
+critical value 2 is -8.16776e-08 + 1 i
+critical value 3 is -0.707108 + 0.707107 i
+critical value 4 is -1 + 7.82877e-07 i
+critical value 5 is -0.707106 + -0.707112 i
+critical value 6 is 8.24148e-09 + -1 i
+critical value 7 is 0.707107 + -0.707107 i
+
+
+degree 6 
+
+zero z_0 is -4 + 3 i
+zero z_1 is 4.83767 + 1.17127 i
+zero z_2 is 1.9335 + 2.76462 i
+zero z_3 is 0.568712 + 2.14905 i
+zero z_4 is 0.70067 + 0.61522 i
+zero z_5 is 0.95579 + 1.43251 i
+pole p_0 is 4 + 3 i
+pole p_1 is 0 + -5 i
+pole p_2 is 1.0877 + 2.83607 i
+pole p_3 is -0.259849 + 1.6487 i
+pole p_4 is 0.896122 + 1.43675 i
+pole p_5 is 1.49719 + 1.27434 i
+multiplier m is 1.00522 + -0.357962
+critical point 0 is 0.951917 + 1.26788 i
+critical point 1 is 0.537833 + 1.44995 i
+critical point 2 is 0.978649 + 1.60935 i
+critical point 3 is 1.32273 + 2.18874 i
+critical point 4 is -1.0065 + 0.143725 i
+critical point 5 is 2.84684 + 1.81783 i
+critical point 6 is 2.1873 + -0.129372 i
+critical point 7 is -0.0506214 + 2.83472 i
+critical point 8 is 1.63261 + 4.23801 i
+critical point 9 is 10.1439 + 6.24026 i
+critical value 0 is 1 + 4.57586e-08 i
+critical value 1 is 0.809017 + 0.587785 i
+critical value 2 is 0.309017 + 0.951056 i
+critical value 3 is -0.309017 + 0.951057 i
+critical value 4 is -0.809017 + 0.587785 i
+critical value 5 is -1 + 2.83457e-10 i
+critical value 6 is -0.809017 + -0.587785 i
+critical value 7 is -0.309017 + -0.951057 i
+critical value 8 is 0.309017 + -0.951057 i
+critical value 9 is 0.809017 + -0.587785 i
+
+
+degree 7
+
+zero z_0 is -4 + 3 i
+zero z_1 is 4.70571 + 0.034193 i
+zero z_2 is 0.567485 + 0.624857 i
+zero z_3 is 0.236491 + -0.134029 i
+zero z_4 is 0.489133 + -1.38072 i
+zero z_5 is 0.908615 + -0.554869 i
+zero z_6 is 1.09495 + 0.642201 i
+pole p_0 is 4 + 3 i
+pole p_1 is 0 + -5 i
+pole p_2 is 0.361066 + 0.786458 i
+pole p_3 is -0.0348285 + -0.516734 i
+pole p_4 is 0.827433 + -0.595018 i
+pole p_5 is 1.4436 + -0.276194 i
+pole p_6 is 0.718083 + 0.546101 i
+multiplier m is 0.847361 + -0.31932
+critical point 0 is 0.460217 + -0.613607 i
+critical point 1 is 0.813927 + -0.359757 i
+critical point 2 is 0.852243 + 0.195702 i
+critical point 3 is 0.476965 + 0.432286 i
+critical point 4 is -1.0264 + -1.32166 i
+critical point 5 is -0.437044 + 0.255112 i
+critical point 6 is 2.34732 + 0.780057 i
+critical point 7 is 0.835587 + 1.89377 i
+critical point 8 is 2.12612 + -1.70964 i
+critical point 9 is 0.69642 + 0.747836 i
+critical point 10 is 0.98992 + -0.747342 i
+critical point 11 is 15.2057 + 1.8166 i
+critical value 0 is 1 + 2.39018e-10 i
+critical value 1 is 0.866025 + 0.5 i
+critical value 2 is 0.5 + 0.866025 i
+critical value 3 is -1.45669e-08 + 1 i
+critical value 4 is -0.5 + 0.866025 i
+critical value 5 is -0.866025 + 0.5 i
+critical value 6 is -1 + -7.22535e-10 i
+critical value 7 is -0.866025 + -0.5 i
+critical value 8 is -0.5 + -0.866025 i
+critical value 9 is -1.6282e-09 + -1 i
+critical value 10 is 0.5 + -0.866025 i
+critical value 11 is 0.866025 + -0.5 i
+
+
+degree 8
+
+zero z_0 is -4 + 3 i
+zero z_1 is 2.48879 + 1.76819 i
+zero z_2 is 1.40446 + 1.33029 i
+zero z_3 is 0.875614 + 1.76893 i
+zero z_4 is -0.14825 + 0.610151 i
+zero z_5 is -0.353108 + 0.221337 i
+zero z_6 is -0.0247377 + 0.447313 i
+zero z_7 is 0.650277 + 0.391263 i
+pole p_0 is 2.06471 + 2.172 i
+pole p_1 is 0 + -5 i
+pole p_2 is 1.02915 + 1.54908 i
+pole p_3 is -0.409918 + 1.43582 i
+pole p_4 is -0.157911 + 0.564149 i
+pole p_5 is 0.0337076 + 0.477876 i
+pole p_6 is -0.185849 + 0.194321 i
+pole p_7 is 1.52722 + 1.11331 i
+multiplier m is 0.983374 + -0.773679
+critical point 0 is -0.0637327 + 0.54793 i
+critical point 1 is 0.0575532 + 0.718559 i
+critical point 2 is -0.18418 + 0.40488 i
+critical point 3 is -0.307452 + 0.601877 i
+critical point 4 is 0.0571393 + 0.330901 i
+critical point 5 is -1.39422 + 0.169168 i
+critical point 6 is -0.148856 + -0.271115 i
+critical point 7 is 1.797 + 1.50363 i
+critical point 8 is 1.32215 + 1.75259 i
+critical point 9 is 2.09825 + 0.328133 i
+critical point 10 is 0.555069 + 2.81738 i
+critical point 11 is 3.77048 + 3.8148 i
+critical point 12 is 1.13605 + 1.14057 i
+critical point 13 is 0.631769 + 1.34049 i
+critical value 0 is 1 + -3.21982e-08 i
+critical value 1 is 0.900969 + 0.433884 i
+critical value 2 is 0.62349 + 0.781831 i
+critical value 3 is 0.222521 + 0.974928 i
+critical value 4 is -0.222521 + 0.974928 i
+critical value 5 is -0.62349 + 0.781831 i
+critical value 6 is -0.900969 + 0.433884 i
+critical value 7 is -1 + 4.71827e-10 i
+critical value 8 is -0.900969 + -0.433884 i
+critical value 9 is -0.62349 + -0.781831 i
+critical value 10 is -0.222521 + -0.974928 i
+critical value 11 is 0.222521 + -0.974928 i
+critical value 12 is 0.62349 + -0.781831 i
+critical value 13 is 0.900969 + -0.433884 i
