@@ -48,6 +48,8 @@ class rational_map{
 		void set_target_to_roots_of_unity();
 		void set_target_radius(int, double);
 		void set_target_argument(int, double);
+		
+		void Mobius();					// adjust R,P by a Mobius transformation
 };
 
 complex<double> rational_map::EVAL(complex<double> z){	// evaluate z
@@ -430,6 +432,19 @@ void rational_map::compute_Jacobian(){
 			COL[j]=-w;
 		};
 		PERTURB.push_back(COL);		// derivative of V with respect to Zeros[i]
+	};
+};
+
+void rational_map::Mobius(){	// adjust Z,P by a Mobius transformation to prevent clustering if possible.
+	int i;
+	complex<double> w;
+	for(i=0;i<(int) Zeros.size();i++){
+		w=Zeros[i];
+		w=(2.0*w+1.0)/(1.0*w+1.0);
+		Zeros[i]=w;
+		w=Poles[i];
+		w=(2.0*w+1.0)/(1.0*w+1.0);
+		Poles[i]=w;
 	};
 };
 

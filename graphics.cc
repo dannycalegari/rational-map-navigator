@@ -252,6 +252,7 @@ void rational_map::draw_PZCV(){	// graphical output routine
 		XDrawString(display,win,gc,p.x+3,p.y-3,S.c_str(),strlen(S.c_str()));
 		T.str("");
 	};
+	
     XSetForeground(display, gc, (long) 0x000000);
 
 	if(ZP=='Z'){
@@ -330,7 +331,9 @@ void rational_map::steer_to_target(){
 	};
 	
 	j=0;
-	SPEED=0.03;		// fast but buggy; what is a good speed?
+	SPEED=0.03;		// fast but buggy; what is a good speed? 0.002? 0.00001?
+	// Probably need to slow down and apply Mobius transformations to prevent collisions
+
 	STEER=PROX;
 	while(norm(PROX)>0.01){
 		if(j%4==0){
@@ -342,7 +345,7 @@ void rational_map::steer_to_target(){
 		for(i=0;i<(int) V.size();i++){
 			PROX[i]=((TARGET[i]-V[i]));
 			if(abs(PROX[i])<0.1){	// if close enough,
-				STEER[i]=PROX[i]/SPEED;
+				STEER[i]=PROX[i]*10.0;
 			} else if(abs(PROX[i])<0.2){
 				STEER[i]=PROX[i]*5.0;
 			} else	{
@@ -362,7 +365,6 @@ void rational_map::steer_to_target(){
 			Poles[i]=Poles[i]+SPEED*ADJUST[i+Zeros.size()+1];
 		};
 		compute_coefficients();
-
 		adjust_C_and_V();
 		j++;
 	};
@@ -480,6 +482,12 @@ void graphics_routine(rational_map &R, bool &finished){
 			if(XLookupKeysym(&report.xkey, 0) == XK_c){
 				R.set_target_argument(R.V_index,arg(R.V[R.V_index])-0.1);
 				R.steer_to_target();
+				break;
+			};
+			if(XLookupKeysym(&report.xkey, 0) == XK_y){
+				R.Mobius();
+				R.compute_coefficients();
+				R.adjust_C_and_V();
 				break;
 			};
 			if(XLookupKeysym(&report.xkey, 0) == XK_q){		// quit
