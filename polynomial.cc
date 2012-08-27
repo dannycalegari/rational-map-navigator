@@ -32,6 +32,8 @@ class polynomial{
 
 		void compute_roots();			// determine roots r[*] from coefficients a[*]
 		void write();
+		
+		~polynomial(){ };	
 };
 
 int polynomial::degree(){
@@ -194,6 +196,7 @@ polynomial D(polynomial P){		// derivative of polynomial
 complex<double> polynomial::find_root(){	// finds a root by Newton's method
 	complex<double> z;
 	int i;
+	i=0;
 	if(degree()==0){
 		cout << "degree 0 has no roots! \n";
 		return(0.0);

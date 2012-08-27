@@ -44,6 +44,8 @@ class rational_map{
 
 		void steer_to_roots_of_unity();		// adjust V in a straight line to roots of unity
 		void braid_V(int, int);					// braid V[i] from eta^i around eta^j and back
+
+		~rational_map(){};
 };
 
 complex<double> rational_map::EVAL(complex<double> z){	// evaluate z
