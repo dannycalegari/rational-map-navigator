@@ -38,12 +38,9 @@ vector<complex<double> >  invert_matrix(vector< vector<complex<double> > > N, ve
 	Basically, we start with a copy M of N and U initialized to the (n+r) x (n+r) identity matrix. Then
 	we perform an identical sequence of column operations to M and to U so that at the end,
 	the first column of M is equal to v. Since NU=M stays constant throughout, the first 
-	column of U is our desired answer.	
-	
-	Note that this implementation ASSUMES, but does NOT check, that
-	N is square of full rank, and has the same size as v. */	
+	column of U is our desired answer.	 */	
 
-	// returns vector U[0] such that NU[0] = v. I.e. computes u = N^{-1}v.
+	// returns vector U[0] such that NU[0] = v. 
 	// N[j] is column j, N[j][i] is column j row i.
 	
 	int rows, cols;
@@ -113,7 +110,7 @@ vector<complex<double> >  invert_matrix(vector< vector<complex<double> > > N, ve
 			for(k=0;k<rows;k++){
 				M[j][k]=M[j][k]-l*M[i][k];
 			};
-			// keep u in sync
+			// keep U in sync
 			for(k=0;k<cols;k++){
 				U[j][k]=U[j][k]-l*U[i][k];
 			};
@@ -130,7 +127,7 @@ vector<complex<double> >  invert_matrix(vector< vector<complex<double> > > N, ve
 		for(k=0;k<rows;k++){
 			M[0][k]=M[0][k]+l*M[i][k];
 		};
-	// keep u in sync
+	// keep U in sync
 		for(k=0;k<cols;k++){
 			U[0][k]=U[0][k]+l*U[i][k];
 		};
