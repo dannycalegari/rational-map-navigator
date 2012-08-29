@@ -40,8 +40,6 @@ using std::string;
 using std::vector;
 using std::complex; */
 
-int TOTAL_ERRORS;	// counter to see how often seeded Newton's method for root finding fails
-
 #include "monodromy.cc"
 #include "linear.cc"
 #include "points.cc"
@@ -52,8 +50,6 @@ int TOTAL_ERRORS;	// counter to see how often seeded Newton's method for root fi
 
 
 int main(int argc, char *argv[]){	
-
-	TOTAL_ERRORS=0;
 
 	rational_map R;
 	bool finished;

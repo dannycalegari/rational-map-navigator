@@ -25,12 +25,15 @@ class polynomial{
 		int degree();					// degree of polynomial
 		void compute_coefficients();	// determine coefficients a[*] from roots r[*] and multiplier m
 		polynomial D();					// derivative
-		complex<double> find_root();	// find a root by Newton's method
+
+		complex<double> find_root();	// find a root by Newton's method; should replace this with Jenkins-Traub method
+		complex<double> closest_root(complex<double>);		// compares roots to find closest one to seed
+
+
 		complex<double> find_nearby_root(complex<double>);	// find a root by Newton's method, with initial seed value; 
 			// note: "find_nearby_root" is surprisingly useless for tracking critical points/values
 		complex<double> find_nearby_root_with_seed(vector<complex<double> >);	// find a root from seed vector
 
-		complex<double> closest_root(complex<double>);		// compares roots to find closest one to seed
 
 		void compute_roots();			// determine roots r[*] from coefficients a[*]
 		void compute_roots_with_seed(vector<complex<double> >);	// S is seed of nearby roots
@@ -263,10 +266,8 @@ complex<double> polynomial::find_nearby_root_with_seed(vector<complex<double> > 
 					z=SEED[j];
 					i=0;	// reset i!
 				} else {
-					TOTAL_ERRORS++;
 					cout << "\n";
 					cout << "	ERROR: couldn't find a nearby root! picking random seed!\n";
-					cout << "   TOTAL ERROR COUNT: " << TOTAL_ERRORS << "\n";
 					cout << "\n";
 					i=0;
 					real(z)=(double) (100.0*rand() / RAND_MAX)-50.0;
@@ -311,7 +312,7 @@ void polynomial::compute_roots(){
 	m=R.a[0];	// remember multiplier
 };
 
-void polynomial::compute_roots_with_seed(vector<complex<double> > SEED){	// FLUFFY
+void polynomial::compute_roots_with_seed(vector<complex<double> > SEED){
 	polynomial R,S;
 	complex<double> z;
 	int i,j;

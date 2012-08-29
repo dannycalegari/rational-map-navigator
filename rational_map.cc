@@ -507,7 +507,8 @@ void rational_map::compute_Jacobian(){
 
 void rational_map::Mobius(){	// adjust Z,P by a Mobius transformation to prevent clustering if possible.
 	int i;
-	complex<double> w;
+	complex<double> w;	
+	
 	for(i=0;i<(int) Zeros.size();i++){
 		w=Zeros[i];
 		w=(2.0*w+1.0)/(1.0*w+1.0);
