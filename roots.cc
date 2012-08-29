@@ -1,9 +1,10 @@
 /* roots.cc function to compute roots of complex polynomial */
 
 
-polynomial J_T_poly(polynomial P){
+polynomial J_T_real_poly(polynomial P){
 	int i;
 	polynomial Q;
+	Q.a.resize(0);
 	for(i=0;i<=P.degree();i++){
 		Q.a.push_back(abs(P.a[i]));
 	};
@@ -35,15 +36,16 @@ complex<double> J_T_find_root(polynomial P){
 		H=J/monomial(1.0,1);			
 	};
 	// stage 2
-	J=J_T_poly(Q);
-	s=J.find_root();
-	while(s.real()<=0.0){
+	J=J_T_real_poly(Q);
+	s=J.find_root();	//  Newton's method. But it's OK because J is real.
+	while(s.real()<=0.0){		// find the unique positive real root.
 		J=J/(monomial(1.0,1)-monomial(s,0));
 		s=J.find_root();
 	};
-	s=s*exp(I*(double) (100.0*rand() / RAND_MAX));
+	
+	s=s*exp(I*(double) (100.0*rand() / RAND_MAX));	// give it a random argument
 	t=s;
-	for(i=0;i<9;i++){	// M=5?
+	for(i=0;i<9;i++){	// L=14?
 		J=Q-H*(Q.EVAL(s)/H.EVAL(s));
 		H=J/(monomial(1.0,1)-monomial(s,0));
 	};	
@@ -72,46 +74,3 @@ vector<complex<double> > J_T_find_roots(polynomial P){
 	};
 	return(r);
 };
-
-/*
-complex<double> polynomial::find_root(){	// finds a root by Newton's method
-	complex<double> z;
-	int i;
-	i=0;
-	if(degree()==0){
-		cout << "degree 0 has no roots! \n";
-		return(0.0);
-	} else {			// find a root by Newton's method
-		z=0.0;
-		while(norm(EVAL(z))>0.0000000000000000001){
-			z=z-EVAL(z)/(D().EVAL(z));	// standard adjustment
-			i++;
-			if(i>100){		// if it hasn't found a root quickly, pick new initial value
-				i=0;
-				real(z)=(double) (100.0*rand() / RAND_MAX)-50.0;
-				imag(z)=(double) (100.0*rand() / RAND_MAX)-50.0;
-				cout << "root-finding trouble. \n";
-			};
-		};
-		return(z);
-	};
-};
-
-void polynomial::compute_roots(){
-	polynomial R,S;
-	complex<double> z;
-	int i;
-	r.resize(0);	// clear list of roots
-	R.a.resize(0);
-	for(i=0;i<(int) a.size();i++){
-		R.a.push_back(a[i]);
-	};
-	while(R.degree()>0){
-		z=R.find_root();	// find a root
-		r.push_back(z);		// add it to the list of roots
-		R=R/(monomial(1.0,1)-monomial(z,0));	// R=R/(z-root)
-	};
-	m=R.a[0];	// remember multiplier
-};
-
-*/
