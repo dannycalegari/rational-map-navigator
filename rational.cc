@@ -40,6 +40,9 @@ using std::string;
 using std::vector;
 using std::complex; */
 
+int TOTAL_ERRORS;	// counter to see how often seeded Newton's method for root finding fails
+
+#include "monodromy.cc"
 #include "linear.cc"
 #include "points.cc"
 #include "polynomial.cc"
@@ -47,51 +50,21 @@ using std::complex; */
 #include "graphics.cc"
 
 
+
 int main(int argc, char *argv[]){	
-	
-	
-	vector<complex<double> > roots;
-	complex<double> m,z,w,eta;
-	complex<double> I (0.0,1.0);
-	polynomial P,Q;
-	rational_map R,S;
-	int d,i;
+
+	TOTAL_ERRORS=0;
+
+	rational_map R;
 	bool finished;
-	
-	m=1.0;
-	
-	
+	int d;
+		
 	cout << "Welcome to the rational map explorer!\n";
 	cout << "Enter degree of rational map:";
 	cin >> d;
 	cout << "Setting up initial zeros/poles.\n\n";
 	
-	w.real()=0;
-	w.imag()=TWOPI/(2.0*(double) d);
-	eta=exp(w);	// 2dth root of unity
-	roots.resize(0);	// initializing roots
-	for(i=0;i<d;i++){
-		roots.push_back(eta^(2*i));
-	};
-	roots[0]=-5.0;
-	R.Zeros=roots;
-	roots.resize(0);
-	for(i=0;i<d;i++){
-		roots.push_back(eta^(2*i+1));
-	};
-	roots[0]=5.0;
-	R.Poles=roots;
-	R.M=m;
-
-	R.compute_coefficients();
-	R.compute_C_and_V();
-	R.initialize_perturbation_matrix();
-	R.ZP='Z';	
-	R.ZP_index=0;
-	R.V_index=0;
-	
-	R.VF='X';	// initialize don't draw vector field
-	R.integral_curves=false;
+	R.initialize(d);
 	
 	setup_graphics();
 	setup_font();
@@ -117,7 +90,7 @@ int main(int argc, char *argv[]){
 	while(finished==false){
 		graphics_routine(R,finished);
 	};
-	
+
 	
 	return(0);
 }

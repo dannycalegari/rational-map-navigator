@@ -370,11 +370,107 @@ void rational_map::steer_to_target(){
 	};
 };
 
+void rational_map::braid_critical_values(int i, int j, bool over){	
+	// braid v_i past . . . v_{i+j} over or under (depending on over) and switch labels.
+	// note: j may be negative.
+	
+	/* Let w be the primitive 2d-2th root of unity with smallest argument. We ASSUME that
+	every v_i starts out equal to w^i. This is guaranteed by applying function
+	set_target_to_roots_of_unity() followed by steer_to_target(). Let's do this first just
+	in case. */
+	
+	set_target_to_roots_of_unity();
+	steer_to_target();
+	
+	/*
+	Push the radius of v_i to 0.5 if !over or to 2.0 if over. 
+	Multiply v_i by w^j and we multiply v_l by w^{-1} for all l from i+1 to i+j (if j positive)
+							or we multiply v_l by w for all l from i-1 to i+j (if j negative)
+	Push the radius of v_i back to 1.0
+	Switch labels on v_i . . . v_{i+j}
+	*/
+		
+	int a,b;
+	complex<double> c, w, eta;
+	
+	w.real()=0;
+	w.imag()=TWOPI/(double) V.size();
+	eta=exp(w);	// 2d-2th root of unity
+	
+	// adjust radius of V[i]
+	
+	if(!over){	
+		set_target_radius(i,0.5);	// braid v_i under v_l
+	} else {
+		set_target_radius(i,3.0);	// braid v_i over v_l
+	};
+	steer_to_target();
+	
+	// adjust arguments of V[l] for l up/down to i+j
+	
+	if(j>0){
+		for(a=1;a<=j;a++){
+			b=(i+a)% (int) V.size();
+			set_target_argument(b,arg(V[b])-TWOPI/(double) V.size());
+		};
+	} else {
+		for(a=-1;a>=j;a--){
+			b=(i+a+(int) V.size()) % (int) V.size();
+			set_target_argument(b,arg(V[b])+TWOPI/(double) V.size());
+		};
+	};
+	steer_to_target();
+	
+	// adjust argument of V[i] |j| times (continuity)
+	
+	if(j>0){
+		for(a=0;a<j;a++){
+			set_target_argument(i,arg(V[i])+TWOPI/(double) V.size());
+			steer_to_target();
+		};
+	} else {
+		for(a=0;a>j;a--){
+			set_target_argument(i,arg(V[i])-TWOPI/(double) V.size());
+			steer_to_target();
+		};	
+	};
+	
+	// adjust radius of V[i]
+	
+	set_target_radius(i,1.0);
+	steer_to_target();
+	
+	// relabel C and V
+	
+	if(j>0){
+		c=C[i];
+		for(a=i;a<=i+j;a++){
+			b= a% (int) C.size();
+			C[b]=C[(b+1) % (int) C.size()];
+		};
+		C[(i+j) % (int) C.size()]=c;
+	} else {
+		c=C[i];
+		for(a=i;a>=i+j;a--){
+			b= (a+(int) C.size()) % (int) C.size();
+			C[b]=C[ (b-1 + (int) C.size()) % (int) C.size()];
+		};
+		C[(i+j+(int) C.size()) % (int) C.size()]=c;
+	};
+	for(a=0;a<(int) C.size();a++){
+		V[a]=EVAL(C[a]);
+	};
+	
+};	
+
+
 void graphics_routine(rational_map &R, bool &finished){
 	// function stereo_point takes complex plane to disk of radius 2, stereographically
 	// function inverse_stereo takes disk of radius 2 to complex plane
 	complex<double> z;
 	point p;
+	vector<braid> B;
+	int i;
 		
 	erase_field();
 	R.draw_PZCV();
@@ -484,10 +580,11 @@ void graphics_routine(rational_map &R, bool &finished){
 				R.steer_to_target();
 				break;
 			};
-			if(XLookupKeysym(&report.xkey, 0) == XK_y){
-				R.Mobius();
-				R.compute_coefficients();
-				R.adjust_C_and_V();
+			if(XLookupKeysym(&report.xkey, 0) == XK_y){	// braid to base monodromy
+				B=compute_reset_sequence((int) R.Zeros.size(), R.MONODROMY);
+				for(i=0;i<(int) B.size();i++){
+					R.braid_critical_values(B[i].i,B[i].j,B[i].over);
+				};
 				break;
 			};
 			if(XLookupKeysym(&report.xkey, 0) == XK_q){		// quit

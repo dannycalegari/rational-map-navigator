@@ -2,6 +2,8 @@
 
 class rational_map{
 	public:	
+	
+		// DATA
 		vector<complex<double> > Zeros;
 		vector<complex<double> > Poles;
 		complex<double> M;					// multiplier
@@ -17,7 +19,10 @@ class rational_map{
 		vector<complex<double> > STEER;				// steer vector; which way should we move V?
 		vector<complex<double> > ADJUST;				// adjust vector; PERTURB(ADJUST) = STEER
 		vector<complex<double> > TARGET;			// target vector; where should we move V to?
-
+		vector<transposition> MONODROMY;			// vector of transpositions giving monodromy
+		
+		// FUNCTIONS
+		void initialize(int);				// initialize to "default" values; degree is specified
 		
 		complex<double> EVAL(complex<double> );		// evaluate function on complex number
 		complex<double> PREIMAGE(complex<double>, complex<double> );	// find inverse near prescribed seed value
@@ -48,9 +53,44 @@ class rational_map{
 		void set_target_to_roots_of_unity();
 		void set_target_radius(int, double);
 		void set_target_argument(int, double);
+		void braid_critical_values(int, int, bool);	// braid v_i past [. . . v_{i+/-j}] over (if bool is true) or under (if bool is false) and switch labels
 		
 		void Mobius();					// adjust R,P by a Mobius transformation
 };
+
+void rational_map::initialize(int d){
+	int i;
+	vector<complex<double> > roots;
+	complex<double> w,eta;
+	
+	w.real()=0;
+	w.imag()=TWOPI/(2.0*(double) d);
+	eta=exp(w);	// 2dth root of unity
+	roots.resize(0);	// initializing roots
+	for(i=0;i<d;i++){
+		roots.push_back(eta^(2*i));
+	};
+	roots[0]=-5.0;
+	Zeros=roots;
+	roots.resize(0);
+	for(i=0;i<d;i++){
+		roots.push_back(eta^(2*i+1));
+	};
+	roots[0]=5.0;
+	Poles=roots;
+	M=1.0;
+
+	compute_coefficients();
+	compute_C_and_V();
+	initialize_perturbation_matrix();
+	ZP='Z';			// select zero
+	ZP_index=0;		// select zero 0
+	V_index=0;		// select critical value 0
+	
+	VF='X';	// don't draw vector field
+	integral_curves=false;	// don't draw integral curves
+};
+
 
 complex<double> rational_map::EVAL(complex<double> z){	// evaluate z
 	return(P(z)/Q(z));
@@ -91,17 +131,23 @@ void rational_map::compute_C_and_V(){	// compute for the first time
 	};
 };
 
-void rational_map::adjust_C_and_V(){	// adjust values, tracking critical points
+void rational_map::adjust_C_and_V(){	// adjust values, tracking critical values
 	polynomial W;
 	int i,j;
 	complex<double> z;
 	W=Wronskian(P,Q);
 	W.compute_roots();	// these are the critical points of P/Q
+//	W.compute_roots_with_seed(C);
+	vector<complex<double> > L;
+	for(i=0;i<(int) W.r.size();i++){
+		L.push_back(EVAL(W.r[i]));
+	};
 	for(i=0;i<(int) C.size();i++){
-		j=closest_entry(W.r,C[i]);	// closest_entry is defined in linear.cc
+		j=closest_entry(L,V[i]);	// closest_entry is defined in linear.cc
 		C[i]=W.r[j];
 		V[i]=EVAL(C[i]);
 		W.r.erase(W.r.begin()+j);	// remove this from list of roots
+		L.erase(L.begin()+j);
 
 		/* WARNING: finding closest root numerically can (and does) easily lead to
 		errors when critical points are too close. It is worth checking the monodromy
@@ -286,6 +332,9 @@ void rational_map::output_data(){					// output data to cout
 	for(i=0;i<(int) V.size();i++){
 		cout << "critical value " << i << " is " << V[i].real() << " + " << V[i].imag() << " i\n";
 	};
+	for(i=0;i<(int) MONODROMY.size();i++){
+		cout << "monodromy around critical value " << i << " is " << MONODROMY[i].i << "<->" << MONODROMY[i].j << "\n";
+	};
 };
 
 void rational_map::compute_monodromy(){			// compute monodromy around critical values along ``standard contours''
@@ -303,8 +352,16 @@ void rational_map::compute_monodromy(){			// compute monodromy around critical v
 	double t;
 	double accuracy;
 	point p;
+	transposition tau;
 	
 	accuracy=0.0001;	// hardcoded; acc for short in comments hereafter
+	
+	MONODROMY.resize(0);
+	for(i=0;i<(int) C.size();i++){
+		tau.i=0;
+		tau.j=1;
+		MONODROMY.push_back(tau);
+	};
 
 	cout << "computing monodromy.\n";
 
@@ -324,6 +381,7 @@ void rational_map::compute_monodromy(){			// compute monodromy around critical v
 		};
 		select_ZP(w);
 		cout << ZP_index << " <-> ";
+		tau.i=ZP_index;
 		w=C[i]+sqrt(accuracy);	// ith critical point.
 		for(t=0.0;t<TWOPI;t=t+0.01){	// positive loop around v of radius acc
 				w=PREIMAGE((1.0-accuracy)*v-(exp(t*I)-1.0)*v*accuracy,w);
@@ -343,6 +401,9 @@ void rational_map::compute_monodromy(){			// compute monodromy around critical v
 		};
 		select_ZP(w);
 		cout << ZP_index << "\n";
+		tau.j=ZP_index;
+		enforce_order(tau);
+		MONODROMY[i]=tau;
 	};
 	cout << "\n";
 };

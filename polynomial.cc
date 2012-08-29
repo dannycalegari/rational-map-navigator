@@ -28,9 +28,12 @@ class polynomial{
 		complex<double> find_root();	// find a root by Newton's method
 		complex<double> find_nearby_root(complex<double>);	// find a root by Newton's method, with initial seed value; 
 			// note: "find_nearby_root" is surprisingly useless for tracking critical points/values
+		complex<double> find_nearby_root_with_seed(vector<complex<double> >);	// find a root from seed vector
+
 		complex<double> closest_root(complex<double>);		// compares roots to find closest one to seed
 
 		void compute_roots();			// determine roots r[*] from coefficients a[*]
+		void compute_roots_with_seed(vector<complex<double> >);	// S is seed of nearby roots
 		void write();
 };
 
@@ -239,6 +242,42 @@ complex<double> polynomial::find_nearby_root(complex<double> seed){	// finds a r
 	};
 };
 
+complex<double> polynomial::find_nearby_root_with_seed(vector<complex<double> > SEED){
+	complex<double> z;
+	int i,j;
+//	cout << "initial value " << seed.real() << " + " << seed.imag() << "i\n";
+//	cout << "EVAL is " << EVAL(seed).real() << " + " << EVAL(seed).imag() << "i\n";
+	if(degree()==0){
+		cout << "degree 0 has no roots! \n";
+		return(0.0);
+	} else {			// find a root by Newton's method
+		j=0;
+		z=SEED[j];
+		while(norm(EVAL(z))>0.0000000000000000001){
+			z=z-(EVAL(z))/(D().EVAL(z));	// standard adjustment
+			i++;
+			if(i>100){		// if it hasn't found a root quickly, pick new initial value
+				if(j<(int) SEED.size()-1){
+					j++;
+					z=SEED[j];
+					i=0;	// reset i!
+				} else {
+					TOTAL_ERRORS++;
+					cout << "\n";
+					cout << "	ERROR: couldn't find a nearby root! picking random seed!\n";
+					cout << "   TOTAL ERROR COUNT: " << TOTAL_ERRORS << "\n";
+					cout << "\n";
+					i=0;
+					real(z)=(double) (100.0*rand() / RAND_MAX)-50.0;
+					imag(z)=(double) (100.0*rand() / RAND_MAX)-50.0;
+				};
+			};
+		};
+		return(z);
+	};
+};	// find a root from seed vector
+
+
 complex<double> polynomial::closest_root(complex<double> z){	// compares roots to find closest one to seed
 	complex<double> w;
 	int i, closest;
@@ -271,6 +310,25 @@ void polynomial::compute_roots(){
 	m=R.a[0];	// remember multiplier
 };
 
+void polynomial::compute_roots_with_seed(vector<complex<double> > SEED){	// FLUFFY
+	polynomial R,S;
+	complex<double> z;
+	int i,j;
+	r.resize(0);	// clear list of roots
+	R.a.resize(0);
+	for(i=0;i<(int) a.size();i++){
+		R.a.push_back(a[i]);
+	};
+	j=0;
+	while(R.degree()>0){
+		z=R.find_nearby_root_with_seed(SEED);	// find a root
+		r.push_back(z);		// add it to the list of roots
+		R=R/(monomial(1.0,1)-monomial(z,0));	// R=R/(z-root)
+		j++;
+	};
+	m=R.a[0];	// remember multiplier
+
+};
 
 polynomial Wronskian(polynomial P, polynomial Q){	// P'Q - Q'P
 	polynomial W;
