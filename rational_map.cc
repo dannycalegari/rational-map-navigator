@@ -70,13 +70,13 @@ void rational_map::initialize(int d){
 	for(i=0;i<d;i++){
 		roots.push_back(eta^(2*i));
 	};
-	roots[0]=-5.0;
+	roots[0]=5.0;
 	Zeros=roots;
 	roots.resize(0);
 	for(i=0;i<d;i++){
 		roots.push_back(eta^(2*i+1));
 	};
-	roots[0]=5.0;
+	roots[0]=-5.0;
 	Poles=roots;
 	M=1.0;
 
@@ -100,10 +100,19 @@ complex<double> rational_map::PREIMAGE(complex<double> z, complex<double> seed){
 	complex<double> w,u,v;
 	v=seed;
 	w=EVAL(v);
+	int i;
+	i=0;
 	while(abs(z-w)>0.00000000001){	// WARNING: accuracy hardcoded! should be able to specify this
 		u=D().EVAL(v);		
 		v=v-((w-z)/u);	// Newton's method
 		w=EVAL(v);
+		i++;
+		if(i>100){		// if it hasn't found a root quickly, pick new initial value
+			i=0;
+			real(v)=(double) (100.0*rand() / RAND_MAX)-50.0;
+			imag(v)=(double) (100.0*rand() / RAND_MAX)-50.0;
+			cout << "root-finding trouble. skipping to new sheet. \n";
+		};
 	};
 	return(v);
 };

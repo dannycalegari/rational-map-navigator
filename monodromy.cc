@@ -168,7 +168,7 @@ vector<braid> compute_reset_sequence(int d, vector<transposition> T){
 	/* assuming T is a legal transposition sequence of degree d, returns a vector
 	of braids which transform T to the base transposition sequence.
 	
-	Base transposition sequence is (d-2,d-1) (d-3,d-2) . . . (0,1) (0,1) . . . (d-2)(d-1)
+	Base transposition sequence is (d-2,d-1) (d-3,d-2) . . . (0,1) (0,1) . . . (d-2,d-1)
 	*/
 	vector<transposition> S;
 	vector<braid> B;

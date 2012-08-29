@@ -204,12 +204,13 @@ complex<double> polynomial::find_root(){	// finds a root by Newton's method
 	} else {			// find a root by Newton's method
 		z=0.0;
 		while(norm(EVAL(z))>0.0000000000000000001){
-			z=z-(EVAL(z))/(D().EVAL(z));	// standard adjustment
+			z=z-EVAL(z)/(D().EVAL(z));	// standard adjustment
 			i++;
 			if(i>100){		// if it hasn't found a root quickly, pick new initial value
 				i=0;
 				real(z)=(double) (100.0*rand() / RAND_MAX)-50.0;
 				imag(z)=(double) (100.0*rand() / RAND_MAX)-50.0;
+				cout << "root-finding trouble. \n";
 			};
 		};
 		return(z);

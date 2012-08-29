@@ -323,7 +323,7 @@ void rational_map::steer_to_target(){
 	
 	int i,j;
 	complex<double> w, eta;
-	vector<complex<double> > PROX;
+	vector<complex<double> > PROX, VV, PPROX;
 	double SPEED;
 
 	for(i=0;i<(int) V.size();i++){
@@ -335,6 +335,7 @@ void rational_map::steer_to_target(){
 	// Probably need to slow down and apply Mobius transformations to prevent collisions
 
 	STEER=PROX;
+	VV=PROX;
 	while(norm(PROX)>0.01){
 		if(j%4==0){
 			erase_field();
@@ -366,6 +367,31 @@ void rational_map::steer_to_target(){
 		};
 		compute_coefficients();
 		adjust_C_and_V();
+
+// check to make sure we have made progress; otherwise undo last move, and halve speed //
+		for(i=0;i<(int) V.size();i++){
+			VV[i]=((TARGET[i]-V[i]));
+		};
+		if(norm(VV)>1.25*norm(PROX) && norm(PROX)>0.1){	//
+			cout << "norm before step: " << norm(PROX) << "; norm after step: " << norm(VV) << "\n";
+			cout << "slowing down.\n";
+
+			M=M-SPEED*ADJUST[0];
+			for(i=0;i<(int) Zeros.size();i++){
+				Zeros[i]=Zeros[i]-SPEED*ADJUST[i+1];
+			};
+			for(i=0;i<(int) Poles.size();i++){
+				Poles[i]=Poles[i]-SPEED*ADJUST[i+Zeros.size()+1];
+			};
+			compute_coefficients();
+			adjust_C_and_V();	
+			SPEED=SPEED/2.0;
+
+			cout << "adjusted speed is " << SPEED << "\n";
+		} else {
+			SPEED=0.03;
+		};
+
 		j++;
 	};
 };
@@ -581,10 +607,15 @@ void graphics_routine(rational_map &R, bool &finished){
 				break;
 			};
 			if(XLookupKeysym(&report.xkey, 0) == XK_y){	// braid to base monodromy
+				R.set_target_to_roots_of_unity();
+				R.steer_to_target();
+				R.compute_monodromy();
 				B=compute_reset_sequence((int) R.Zeros.size(), R.MONODROMY);
 				for(i=0;i<(int) B.size();i++){
 					R.braid_critical_values(B[i].i,B[i].j,B[i].over);
 				};
+				R.compute_monodromy();
+				R.output_data();
 				break;
 			};
 			if(XLookupKeysym(&report.xkey, 0) == XK_q){		// quit
