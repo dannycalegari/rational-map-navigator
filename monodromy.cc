@@ -55,9 +55,9 @@ void write_braid_sequence(vector<braid> B){
 	};
 };
 
-void prune_braid_sequence(vector<braid> &B){	// eliminate braids which do nothing (i.e. j=0)
+void prune_braid_sequence(vector<braid> &B, int d){	// eliminate braids which do nothing (i.e. j=0)
 	int i;
-	for(i=0;i<(int) B.size();i++){
+	for(i=0;i<(int) B.size();i++){	// eliminate braids which move 0
 		if(B[i].j==0){
 			B.erase(B.begin()+i);
 			i--;
@@ -68,13 +68,13 @@ void prune_braid_sequence(vector<braid> &B){	// eliminate braids which do nothin
 void conjugate(vector<transposition> &T, permutation P){	// changes T to T^P
 	int i;
 //	cout << "performing conjugation by permutation \n";
-	write_permutation(P);
+//	write_permutation(P);
 	for(i=0;i<(int) T.size();i++){
 		T[i].i=P(T[i].i);
 		T[i].j=P(T[i].j);
 		enforce_order(T[i]);
 	};
-	write_transposition_sequence(T);
+//	write_transposition_sequence(T);
 };
 
 transposition conjugate(transposition t, transposition s){	// returns t^s
@@ -100,7 +100,7 @@ void operate(vector<transposition> &T, braid &b){	// change a transposition sequ
 	int n;
 	transposition s;
 //	cout << "operating on S with braid \n";
-	write_braid(b);
+//	write_braid(b);
 	while(b.j!=0){
 		if(b.j>0){	// move to the right
 			n=(b.i+1) % (int) T.size();
@@ -123,7 +123,7 @@ void operate(vector<transposition> &T, braid &b){	// change a transposition sequ
 			b.j++;
 		};
 	};
-	write_transposition_sequence(T);
+//	write_transposition_sequence(T);
 };
 
 
@@ -179,7 +179,7 @@ vector<braid> compute_reset_sequence(int d, vector<transposition> T){
 	B.clear();	// B initialized to empty braid
 	S=T;	// initial value of S equal to T.
 //	cout << "computing reset sequence. current sequence is\n";
-	write_transposition_sequence(S);
+//	write_transposition_sequence(S);
 	
 	int i,j,k,l,m,i_j,i_jj,where;
 	for(i=0;i<d-1;i++){
@@ -311,7 +311,7 @@ vector<braid> compute_reset_sequence(int d, vector<transposition> T){
 		operate(S,b);
 	// S is in the form (i,i+1) (i-1,i) . . . (0,1) (0,1) . . . (i-1,i) (i,i+1) * 
 	};
-	prune_braid_sequence(B);
+	prune_braid_sequence(B,d);
 	cout << "reset sequence is \n";
 	write_braid_sequence(B);
 	return(B);
