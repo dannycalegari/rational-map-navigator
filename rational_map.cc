@@ -1,5 +1,6 @@
 /* rational_map.cc */
 
+
 class rational_map{
 	public:	
 	
@@ -130,8 +131,12 @@ void rational_map::compute_coefficients(){
 void rational_map::compute_C_and_V(){	// compute for the first time
 	polynomial W;
 	int i;
+	vector<complex<double> > zv;
 	W=Wronskian(P,Q);
-	W.compute_roots();	// these are the critical points of P/Q
+	zv=J_T_find_roots(W);
+	W.r=zv;
+//	W=Wronskian(P,Q);
+//	W.compute_roots();	// these are the critical points of P/Q
 	C.resize(0);
 	V.resize(0);
 	for(i=0;i<(int) W.r.size();i++){
@@ -144,8 +149,11 @@ void rational_map::adjust_C_and_V(){	// adjust values, tracking critical values
 	polynomial W;
 	int i,j;
 	complex<double> z;
+	vector<complex<double> > zv;
 	W=Wronskian(P,Q);
-	W.compute_roots();	// these are the critical points of P/Q
+	zv=J_T_find_roots(W);
+	W.r=zv;
+//	W.compute_roots();	// these are the critical points of P/Q
 //	W.compute_roots_with_seed(C);
 	vector<complex<double> > L;
 	for(i=0;i<(int) W.r.size();i++){

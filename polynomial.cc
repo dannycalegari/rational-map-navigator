@@ -1,4 +1,4 @@
-/*	functions.cc	functions of complex parameters */
+/*	polynomial.cc	polynomial class and functions */
 
 class polynomial{
 	public:
@@ -29,16 +29,17 @@ class polynomial{
 		complex<double> find_root();	// find a root by Newton's method; should replace this with Jenkins-Traub method
 		complex<double> closest_root(complex<double>);		// compares roots to find closest one to seed
 
-
 		complex<double> find_nearby_root(complex<double>);	// find a root by Newton's method, with initial seed value; 
 			// note: "find_nearby_root" is surprisingly useless for tracking critical points/values
 		complex<double> find_nearby_root_with_seed(vector<complex<double> >);	// find a root from seed vector
-
 
 		void compute_roots();			// determine roots r[*] from coefficients a[*]
 		void compute_roots_with_seed(vector<complex<double> >);	// S is seed of nearby roots
 		void write();
 };
+
+complex<double> J_T_find_root(polynomial);
+
 
 int polynomial::degree(){
 	return(a.size()-1);
@@ -199,10 +200,12 @@ polynomial D(polynomial P){		// derivative of polynomial
 	
 complex<double> polynomial::find_root(){	// finds a root by Newton's method
 	complex<double> z;
+	vector<int> j;
 	int i;
 	i=0;
 	if(degree()==0){
 		cout << "degree 0 has no roots! \n";
+		cout << j[5];
 		return(0.0);
 	} else {			// find a root by Newton's method
 		z=0.0;
@@ -210,10 +213,12 @@ complex<double> polynomial::find_root(){	// finds a root by Newton's method
 			z=z-EVAL(z)/(D().EVAL(z));	// standard adjustment
 			i++;
 			if(i>100){		// if it hasn't found a root quickly, pick new initial value
+				z=J_T_find_root(*this);
 				i=0;
 				real(z)=(double) (100.0*rand() / RAND_MAX)-50.0;
 				imag(z)=(double) (100.0*rand() / RAND_MAX)-50.0;
 				cout << "root-finding trouble. \n";
+				cout.flush();
 			};
 		};
 		return(z);

@@ -40,10 +40,12 @@ using std::string;
 using std::vector;
 using std::complex; */
 
+
 #include "monodromy.cc"
 #include "linear.cc"
 #include "points.cc"
 #include "polynomial.cc"
+#include "roots.cc"
 #include "rational_map.cc"
 #include "graphics.cc"
 
