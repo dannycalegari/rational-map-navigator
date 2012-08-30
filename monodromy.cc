@@ -56,9 +56,18 @@ void write_braid_sequence(vector<braid> B){
 };
 
 void prune_braid_sequence(vector<braid> &B, int d){	// eliminate braids which do nothing (i.e. j=0)
-	int i;
+	int i,j;
 	for(i=0;i<(int) B.size();i++){	// eliminate braids which move 0
 		if(B[i].j==0){
+			B.erase(B.begin()+i);
+			i--;
+		};
+	};
+	for(i=0;i<(int) B.size();i++){	// eliminate braids which do a cyclic permutation
+		if(B[i].j==3-2*d){
+			for(j=i;j<(int) B.size();j++){
+				B[j].i=(B[j].i+2*d-3) % (2*d-2);
+			};
 			B.erase(B.begin()+i);
 			i--;
 		};
@@ -205,7 +214,14 @@ vector<braid> compute_reset_sequence(int d, vector<transposition> T){
 			conjugate(S,P);
 		} else {
 	//		cout << "at location " << 2*i << " looking for j<=" << i << ", k>" << i << "\n";
-			l=find_matching_transposition(S,2*i,i+1,-1,i,1);	
+			l=-1;
+			for(m=0;m<=i;m++){
+	//			l=find_matching_transposition(S,2*i,i+1,-1,i,1);	
+				l=find_matching_transposition(S,2*i,m,0,i,1);
+				if(l!=-1){
+					m=i;
+				};
+			};
 	//		cout << "found it at location " << l << "\n";
 	// l is index of first (j,k) in * with j<i+1 and k>i
 			if(l>2*i){	
@@ -220,18 +236,34 @@ vector<braid> compute_reset_sequence(int d, vector<transposition> T){
 			j=S[2*i].i;
 			k=S[2*i].j;
 	// S is in the form (i-1,i) . . . (0,1) (0,1) . . . (i-1,i) (j,k) *
-			for(l=0;l<j+1;l++){	// rotate j+1 times
-			//	cout << "performing rotation " << l << "\n";
-				b.i=i;
-				b.j=i-1;
-				b.over=true;
-				B.push_back(b);
-				operate(S,b);
-				b.i=i-1;
-				b.j=1-i;
-				b.over=true;
-				B.push_back(b);
-				operate(S,b);
+			if(j<i/2){
+				for(l=0;l<j+1;l++){	// rotate forwards j+1 times
+				//	cout << "performing rotation " << l << "\n";
+					b.i=i;
+					b.j=i-1;
+					b.over=true;
+					B.push_back(b);
+					operate(S,b);
+					b.i=i-1;
+					b.j=1-i;
+					b.over=true;
+					B.push_back(b);
+					operate(S,b);
+				};
+			} else {
+				for(l=0;l<j+1;l++){	// rotate backwards i-j-1 times
+				//	cout << "performing rotation " << l << "\n";
+					b.i=2*i-1;
+					b.j=1-i;
+					b.over=false;
+					B.push_back(b);
+					operate(S,b);
+					b.i=0;
+					b.j=i-1;
+					b.over=false;
+					B.push_back(b);
+					operate(S,b);
+				};			
 			};
 	// S is in the form (j-1,j) . . . (j,j+1) (j,j+1) . . . (j-1,j) (j,k) *
 			P.i.clear();
