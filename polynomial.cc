@@ -150,30 +150,19 @@ polynomial operator*(polynomial P, complex<double> z){
 };
 
 void polynomial::compute_coefficients(){		// determine coefficients a[*] from roots r[*] and multiplier m
-	polynomial P,L;
+	polynomial P;
 	int i;
-	P.a.resize(0);	// first, clear coefficients
-	P.a.push_back(1.0);	// initialize to the constant polynomial 1
+	P=monomial(m,0);	// P = 1.
 	for(i=0;i<(int) r.size();i++){	// for each root
-		L.a.resize(0);
-		L.a.push_back(-r[i]);
-		L.a.push_back(1.0);		// L = (z-r[i])
-		P=P*L;
+		P=P*(monomial(1.0,1)-monomial(r[i],0));	// P=P*(z-r[i])
 	};
-	a.resize(0);
-	for(i=0;i<(int) P.a.size();i++){
-		a.push_back(m*P.a[i]);
-	};
+	a=P.a;
 };
 
 polynomial make_polynomial(vector<complex<double> > r, complex<double> m){	// returns a polynomial with roots r and multiplier m
 	polynomial P;
-	int i;
 	P.m=m;
-//	P.r.resize(0);
-	for(i=0;i<(int) r.size();i++){
-		P.r.push_back(r[i]);
-	};
+	P.r = r;
 	P.compute_coefficients();
 	return(P);
 };

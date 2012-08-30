@@ -157,6 +157,7 @@ void rational_map::adjust_C_and_V(){	// adjust values, tracking critical values
 //	W.compute_roots();	// these are the critical points of P/Q
 //	W.compute_roots_with_seed(C);
 	vector<complex<double> > L;
+	L.resize(0);
 	for(i=0;i<(int) W.r.size();i++){
 		L.push_back(EVAL(W.r[i]));
 	};
@@ -514,17 +515,89 @@ void rational_map::compute_Jacobian(){
 };
 
 void rational_map::Mobius(){	// adjust Z,P by a Mobius transformation to prevent clustering if possible.
-	int i;
-	complex<double> w;	
+	int i,j,k,l;
+	int ii,jj,kk,ll;
+	complex<double> w,ww,I,s;	
+	double t;
+	vector<complex<double> > Z_and_P;
+	complex<double> A,B,C,D,a,b,c,d;
+	mmatrix MM,N;
+
+	Z_and_P = Zeros;
+	Z_and_P.insert( Z_and_P.end(), Poles.begin(), Poles.end() );	// list of zeros and poles
 	
-	for(i=0;i<(int) Zeros.size();i++){
-		w=Zeros[i];
-		w=(2.0*w+1.0)/(1.0*w+1.0);
-		Zeros[i]=w;
-		w=Poles[i];
-		w=(2.0*w+1.0)/(1.0*w+1.0);
-		Poles[i]=w;
+	ww=cross_ratio(Z_and_P[0],Z_and_P[1],Z_and_P[2],Z_and_P[3]);
+	ii=0;
+	jj=1;
+	kk=2;
+	ll=3;
+	
+	for(i=0;i<(int) Z_and_P.size();i++){
+		for(j=0;j<(int) Z_and_P.size();j++){
+			for(k=0;k<(int) Z_and_P.size();k++){
+				for(l=0;l<(int) Z_and_P.size();l++){
+					if((i-j)*(i-k)*(i-l)*(j-k)*(j-l)*(k-l)!=0){	// if all 4 indices are distinct
+						w=cross_ratio(Z_and_P[i],Z_and_P[j],Z_and_P[k],Z_and_P[l]);
+						if(norm(w)<norm(ww)){
+							ii=i;
+							jj=j;
+							kk=k;
+							ll=l;
+							ww=w;
+						};
+					};
+				};
+			};
+		};
 	};
+	b=Z_and_P[jj];
+	c=Z_and_P[kk];
+	d=Z_and_P[ll];
+	t=sqrt(abs(ww));
+	I.real()=0.0;
+	I.imag()=1.0;
+	s=exp(t*I);
+
+	MM.A=1.0;
+	MM.B=-b;
+	MM.C=0.0;
+	MM.D=1.0;
+	b=operate(MM,b);
+	c=operate(MM,c);
+	d=operate(MM,d);	// M shifts b to 0
+	N.A=1.0/c;
+	N.B=0.0;
+	N.C=0.0;
+	N.D=1.0;
+	MM=mult(N,MM);
+	b=operate(N,b);
+	c=operate(N,c);
+	d=operate(N,d);
+	N.B=0.0;
+	N.D=1.0;
+	N.C=(s-d)/(d-d*s);
+	N.A=N.C+1.0;
+	MM=mult(N,MM);
+	N.A=1.0;
+	N.B=-0.5;
+	N.C=0.0;
+	N.D=1.0;
+	MM=mult(N,MM);
+	N.A=5.0;
+	N.B=0.0;
+	N.C=0.0;
+	N.D=1.0;
+	MM=mult(N,MM);
+
+	for(i=0;i<(int) Zeros.size();i++){
+		Zeros[i]=operate(MM,Zeros[i]);
+	};
+	for(i=0;i<(int) Poles.size();i++){
+		Poles[i]=operate(MM,Poles[i]);
+	};
+//  how does M adjust?
+	compute_coefficients();
+	adjust_C_and_V();
 };
 
 void rational_map::compute_secant(){ 	// how perturbing Z, P and m affects V

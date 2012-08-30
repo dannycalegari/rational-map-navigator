@@ -313,9 +313,9 @@ double norm(vector<complex<double> > v){
 	double t;
 	t=0;
 	for(i=0;i<(int) v.size();i++){
-		t=t+abs(v[i]);
+		t=t+norm(v[i]);
 	};
-	return(t);
+	return(sqrt(t));
 };
 
 void rational_map::steer_to_target(){
@@ -323,77 +323,74 @@ void rational_map::steer_to_target(){
 	
 	int i,j;
 	complex<double> w, eta;
-	vector<complex<double> > PROX, VV, PPROX;
-	double SPEED;
+	vector<complex<double> > PROX, VV, JIGGLE;
+	double SPEED, t;
 
+	PROX.resize(0);
+	JIGGLE.resize(0);
+	
 	for(i=0;i<(int) V.size();i++){
 		PROX.push_back(1.0);
+		JIGGLE.push_back(1.0);
 	};
 	
 	j=0;
-	SPEED=0.03;		// fast but buggy; what is a good speed? 0.002? 0.00001?
+	SPEED=0.001;		// fast but buggy; what is a good speed? 0.002? 0.00001?
 	// Probably need to slow down and apply Mobius transformations to prevent collisions
 
 	STEER=PROX;
 	VV=PROX;
-	while(norm(PROX)>0.01){
-		if(j%4==0){
+	while(norm(STEER)>0.001){
+		t=norm(STEER)/(1.0+norm(STEER));	// when we're close, we should go faster
+
+		for(i=0;i<(int) V.size();i++){
+			STEER[i]=((TARGET[i]-V[i]));
+			VV[i]=V[i]+SPEED*STEER[i]/t;
+		};		
+		compute_Jacobian();
+		compute_adjust_vector();
+
+		M=M+SPEED*ADJUST[0]/t;
+		for(i=0;i<(int) Zeros.size();i++){
+			Zeros[i]=Zeros[i]+SPEED*ADJUST[i+1]/t;
+		};
+		for(i=0;i<(int) Poles.size();i++){
+			Poles[i]=Poles[i]+SPEED*ADJUST[i+Zeros.size()+1]/t;
+		};
+		Mobius();
+		compute_coefficients();
+		adjust_C_and_V();	// ideally now V=VV
+
+// adjusting speed by measuring jiggling; seems very buggy
+
+		for(i=0;i<(int) V.size();i++){
+			JIGGLE[i]=V[i]-VV[i];
+		};
+		if(norm(JIGGLE)>0.5){
+	//		cout << "size of jiggle is " << norm(JIGGLE) << "\n";
+	//		cout << "undoing last step.";
+			M=M-0.5*SPEED*ADJUST[0]/t;
+			for(i=0;i<(int) Zeros.size();i++){
+				Zeros[i]=Zeros[i]-0.5*SPEED*ADJUST[i+1]/t;
+			};
+			for(i=0;i<(int) Poles.size();i++){
+				Poles[i]=Poles[i]-0.5*SPEED*ADJUST[i+Zeros.size()+1]/t;
+			};			
+			compute_coefficients();
+			adjust_C_and_V();	// ideally now V=VV
+			
+		} else {
 			erase_field();
 			draw_PZCV();
 			XFlush(display);
 		};
+		SPEED=0.001/(0.5+norm(JIGGLE));
+// doesn't work well, really	
 		
-		for(i=0;i<(int) V.size();i++){
-			PROX[i]=((TARGET[i]-V[i]));
-			if(abs(PROX[i])<0.1){	// if close enough,
-				STEER[i]=PROX[i]*10.0;
-			} else if(abs(PROX[i])<0.2){
-				STEER[i]=PROX[i]*5.0;
-			} else	{
-				STEER[i]=PROX[i]*(1.0+ 1.0/abs(PROX[i]));
-				if(abs(STEER[i])>10.0){	// absolute speed limit
-					STEER[i]=STEER[i]*10.0/abs(STEER[i]);
-				};
-			};
-		};		
-		compute_Jacobian();
-		compute_adjust_vector();
-		M=M+SPEED*ADJUST[0];
-		for(i=0;i<(int) Zeros.size();i++){
-			Zeros[i]=Zeros[i]+SPEED*ADJUST[i+1];
-		};
-		for(i=0;i<(int) Poles.size();i++){
-			Poles[i]=Poles[i]+SPEED*ADJUST[i+Zeros.size()+1];
-		};
-		compute_coefficients();
-		adjust_C_and_V();
-
-// check to make sure we have made progress; otherwise undo last move, and halve speed //
-		for(i=0;i<(int) V.size();i++){
-			VV[i]=((TARGET[i]-V[i]));
-		};
-		if(norm(VV)>1.25*norm(PROX) && norm(PROX)>0.1){	//
-			cout << "norm before step: " << norm(PROX) << "; norm after step: " << norm(VV) << "\n";
-			cout << "slowing down.\n";
-
-			M=M-SPEED*ADJUST[0];
-			for(i=0;i<(int) Zeros.size();i++){
-				Zeros[i]=Zeros[i]-SPEED*ADJUST[i+1];
-			};
-			for(i=0;i<(int) Poles.size();i++){
-				Poles[i]=Poles[i]-SPEED*ADJUST[i+Zeros.size()+1];
-			};
-			compute_coefficients();
-			adjust_C_and_V();	
-			SPEED=SPEED/2.0;
-
-			cout << "adjusted speed is " << SPEED << "\n";
-		} else {
-			SPEED=0.03;
-		};
-
-		j++;
 	};
+	erase_field();
+	draw_PZCV();
+	XFlush(display);
 };
 
 void rational_map::braid_critical_values(int i, int j, bool over){	
@@ -616,6 +613,10 @@ void graphics_routine(rational_map &R, bool &finished){
 				};
 				R.compute_monodromy();
 				R.output_data();
+				break;
+			};
+			if(XLookupKeysym(&report.xkey, 0) == XK_p){		// renormalize by Mobius
+				R.Mobius();
 				break;
 			};
 			if(XLookupKeysym(&report.xkey, 0) == XK_q){		// quit
