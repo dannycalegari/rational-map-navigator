@@ -40,6 +40,7 @@ class rational_map{
 		void select_ZP(complex<double>);	// select closest zero/pole to given point
 		void adjust_ZP(complex<double>);	// move selected zero/pole by amount
 		void select_V(complex<double>);		// select closest critical value to given point
+		int select_C(complex<double>);		// index of closest critical point to given point
 		void draw_PZCV();					// graphical output routine
 		void output_data();					// output data to cout
 		
@@ -322,7 +323,6 @@ void rational_map::select_V(complex<double> z){	// finds critical value closest 
 	complex<double> w;
 	double dist;
 	int i;
-//	cout << "finding closest zero/pole to " << z.real() << " + " << z.imag() << " i\n";
 	V_index=0;
 	dist=norm(z-V[0]);
 	for(i=0;i<(int) V.size();i++){
@@ -331,6 +331,21 @@ void rational_map::select_V(complex<double> z){	// finds critical value closest 
 			dist=norm(z-V[i]);
 		};
 	};
+};
+
+int rational_map::select_C(complex<double> z){	// finds critical value closest to z, and sets the value of V_index
+	complex<double> w;
+	double dist;
+	int i;
+	int C_index=0;
+	dist=norm(z-C[0]);
+	for(i=0;i<(int) C.size();i++){
+		if(norm(z-C[i])<dist){
+			C_index=i;
+			dist=norm(z-C[i]);
+		};
+	};
+	return(C_index);
 };
 
 void rational_map::output_data(){					// output data to cout
@@ -363,66 +378,51 @@ void rational_map::compute_monodromy(){			// compute monodromy around critical v
 	permutation; thus for each critical value, we just need to work out which pair of zeros
 	steer into the corresponding critical point.	*/
 
-	int i;
-	complex<double> v,w;
+	int i,j,k;
+	complex<double> v,w,d;
 	complex<double> I (0.0,1.0);
-	double t;
-	double accuracy;
 	point p;
 	transposition tau;
-	
-	accuracy=0.0001;	// hardcoded; acc for short in comments hereafter
-	
+		
 	MONODROMY.resize(0);
 	for(i=0;i<(int) C.size();i++){
-		tau.i=0;
-		tau.j=1;
+		tau.i=-1;						// dummy values
+		tau.j=-1;
 		MONODROMY.push_back(tau);
 	};
 
 	cout << "computing monodromy.\n";
-
-	for(i=0;i<(int) C.size();i++){	// ith critical value
+	
+	for(i=0;i<(int) V.size();i++){	// ith critical value
 		v=V[i];
-		cout << "critical value " << i << " = " << v.real() << " + " << v.imag() << " i\n";
-		cout << "monodromy permutation: ";
-
-		w=C[i]+sqrt(accuracy);	// ith critical point.
-		for(t=1.0-accuracy;t>=0.0;t=t-accuracy){	// radial path from (1-acc)*v to 0
-				w=PREIMAGE(v*t,w);
+		for(j=0;j<(int) Zeros.size();j++){
+			w=Zeros[j];
+			while(abs(EVAL(w)-v)>0.00000001){	// want to steer w towards v
+				d=(D()).EVAL(w);	// derivative at w
+				w=w+((0.01)*(v-EVAL(w))/d);
 				p=complex_to_point(stereo_point(w));
-				draw_point(p.x,p.y,0x100410*i*16/C.size());
-				p=complex_to_point(stereo_point(v*t));
+				draw_point(p.x,p.y,0x100410);
+				p=complex_to_point(stereo_point(EVAL(w)));
 				p.x=p.x+640;
-				draw_point(p.x,p.y,0x100410*i*16/C.size());
+				draw_point(p.x,p.y,0x100410);
+			};
+			k=select_C(w); // C[k] is closest critical point to w.
+	//		cout << abs(w-C[k]) << " ";
+	//		cout << "considering whether monodromy[" << k << "] permutes zero " << j << "\n";
+			if(abs(w-C[k])<0.001){
+				if(MONODROMY[k].i==-1){
+					MONODROMY[k].i=j;
+				} else {
+					MONODROMY[k].j=j;
+				};
+			};
 		};
-		select_ZP(w);
-		cout << ZP_index << " <-> ";
-		tau.i=ZP_index;
-		w=C[i]+sqrt(accuracy);	// ith critical point.
-		for(t=0.0;t<TWOPI;t=t+0.01){	// positive loop around v of radius acc
-				w=PREIMAGE((1.0-accuracy)*v-(exp(t*I)-1.0)*v*accuracy,w);
-				p=complex_to_point(stereo_point(w));
-				draw_point(p.x,p.y,0x100410*i*16/C.size());
-				p=complex_to_point(stereo_point((1.0-accuracy)*v-(exp(t*I)-1.0)*v*accuracy));
-				p.x=p.x+640;
-				draw_point(p.x,p.y,0x100410*i*16/C.size());
-		};
-		for(t=1.0-accuracy;t>=0.0;t=t-accuracy){	// radial path from (1-acc)*v to 0
-				w=PREIMAGE(v*t,w);
-				p=complex_to_point(stereo_point(w));
-				draw_point(p.x,p.y,0x100410*i*16/C.size());
-				p=complex_to_point(stereo_point(v*t));
-				p.x=p.x+640;
-				draw_point(p.x,p.y,0x100410*i*16/C.size());
-		};
-		select_ZP(w);
-		cout << ZP_index << "\n";
-		tau.j=ZP_index;
-		enforce_order(tau);
-		MONODROMY[i]=tau;
 	};
-	cout << "\n";
+
+	for(i=0;i<(int) MONODROMY.size();i++){
+		enforce_order(MONODROMY[i]);
+	};
+	write_transposition_sequence(MONODROMY);
 };
 
 void rational_map::initialize_perturbation_matrix(){
