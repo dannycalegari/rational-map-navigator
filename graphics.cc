@@ -357,7 +357,7 @@ void rational_map::steer_to_target(){
 		for(i=0;i<(int) Poles.size();i++){
 			Poles[i]=Poles[i]+SPEED*ADJUST[i+Zeros.size()+1]/t;
 		};
-		Mobius();
+	//	Mobius();
 		compute_coefficients();
 		adjust_C_and_V();	// ideally now V=VV
 
