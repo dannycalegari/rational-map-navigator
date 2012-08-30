@@ -398,7 +398,7 @@ void rational_map::compute_monodromy(){			// compute monodromy around critical v
 		v=V[i];
 		for(j=0;j<(int) Zeros.size();j++){
 			w=Zeros[j];
-			while(abs(EVAL(w)-v)>0.00000001){	// want to steer w towards v
+			while(abs(EVAL(w)-v)>0.000000001){	// want to steer w towards v
 				d=(D()).EVAL(w);	// derivative at w
 				w=w+((0.01)*(v-EVAL(w))/d);
 				p=complex_to_point(stereo_point(w));
@@ -517,11 +517,19 @@ void rational_map::compute_Jacobian(){
 void rational_map::Mobius(){	// adjust Z,P by a Mobius transformation to prevent clustering if possible.
 	int i,j,k,l;
 	int ii,jj,kk,ll;
-	complex<double> w,ww,I,s;	
+	complex<double> w,ww,I,s,z,zz;	
 	double t;
-	vector<complex<double> > Z_and_P;
+	vector<complex<double> > Z_and_P, original_V;
 	complex<double> A,B,C,D,a,b,c,d;
 	mmatrix MM,N;
+	
+	original_V=V;
+	z=V[0];
+	for(i=0;i<(int) V.size();i++){
+		if(norm(V[i])<norm(z)){
+			z=V[i];
+		};
+	};
 
 	Z_and_P = Zeros;
 	Z_and_P.insert( Z_and_P.end(), Poles.begin(), Poles.end() );	// list of zeros and poles
@@ -588,6 +596,8 @@ void rational_map::Mobius(){	// adjust Z,P by a Mobius transformation to prevent
 	N.C=0.0;
 	N.D=1.0;
 	MM=mult(N,MM);
+	
+	// should take log of MM, and adjust by Z -> Z + epsilon*operate(log(M),Z)
 
 	for(i=0;i<(int) Zeros.size();i++){
 		Zeros[i]=operate(MM,Zeros[i]);
@@ -598,6 +608,20 @@ void rational_map::Mobius(){	// adjust Z,P by a Mobius transformation to prevent
 //  how does M adjust?
 	compute_coefficients();
 	adjust_C_and_V();
+	
+	zz=V[0];
+	for(i=0;i<(int) V.size();i++){
+		if(norm(V[i])<norm(zz)){
+			zz=V[i];
+		};
+	};
+	M=M*z/zz;
+//	V=original_V;
+	compute_coefficients();
+	V=original_V;
+	adjust_C_and_V();
+
+
 };
 
 void rational_map::compute_secant(){ 	// how perturbing Z, P and m affects V

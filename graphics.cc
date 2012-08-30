@@ -335,13 +335,13 @@ void rational_map::steer_to_target(){
 	};
 	
 	j=0;
-	SPEED=0.001;		// fast but buggy; what is a good speed? 0.002? 0.00001?
+	SPEED=0.03;		// fast but buggy; what is a good speed? 0.002? 0.00001?
 	// Probably need to slow down and apply Mobius transformations to prevent collisions
 
 	STEER=PROX;
 	VV=PROX;
 	while(norm(STEER)>0.001){
-		t=norm(STEER)/(1.0+norm(STEER));	// when we're close, we should go faster
+		t=3.0*norm(STEER)/(0.33333+norm(STEER));	// when we're close, we should go faster
 
 		for(i=0;i<(int) V.size();i++){
 			STEER[i]=((TARGET[i]-V[i]));
@@ -357,12 +357,13 @@ void rational_map::steer_to_target(){
 		for(i=0;i<(int) Poles.size();i++){
 			Poles[i]=Poles[i]+SPEED*ADJUST[i+Zeros.size()+1]/t;
 		};
-	//	Mobius();
 		compute_coefficients();
 		adjust_C_and_V();	// ideally now V=VV
+		Mobius();		// experimental; should comment this out
+
 
 // adjusting speed by measuring jiggling; seems very buggy
-
+/*
 		for(i=0;i<(int) V.size();i++){
 			JIGGLE[i]=V[i]-VV[i];
 		};
@@ -379,14 +380,13 @@ void rational_map::steer_to_target(){
 			compute_coefficients();
 			adjust_C_and_V();	// ideally now V=VV
 			
-		} else {
-			erase_field();
-			draw_PZCV();
-			XFlush(display);
-		};
-		SPEED=0.001/(0.5+norm(JIGGLE));
+
+		SPEED=0.01/(0.5+norm(JIGGLE));
 // doesn't work well, really	
-		
+		*/
+		erase_field();
+		draw_PZCV();
+		XFlush(display);
 	};
 	erase_field();
 	draw_PZCV();
