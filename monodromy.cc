@@ -12,6 +12,31 @@ void write_transposition_sequence(vector<transposition> T){
 	cout << "\n";
 };
 
+bool is_legal_sequence(vector<transposition> T, int d){
+	int i,j,k;
+	bool legal;
+	
+	legal=true;
+	for(i=0;i<d;i++){
+		k=i;
+	//	cout << k << ",";
+		for(j=0;j<(int) T.size();j++){
+			if(T[j].i==k){
+				k=T[j].j;
+	//			cout << k << "(T" << j << "),";
+			} else if(T[j].j==k){
+				k=T[j].i;
+	//			cout << k << "(T" << j << "),";
+			};
+		};
+		if(k!=i){
+			legal=false;
+		};
+	//	cout << "\n";
+	};
+	return(legal);
+};
+
 void enforce_order(transposition &t){	// switches i and j if necessary so i<j
 	int k;
 	if(t.i>t.j){
@@ -184,9 +209,20 @@ vector<braid> compute_reset_sequence(int d, vector<transposition> T){
 	braid b;
 	permutation P;
 	vector<int> L;
+	bool legal;
 	
 	B.clear();	// B initialized to empty braid
 	S=T;	// initial value of S equal to T.
+	legal=is_legal_sequence(T,d);
+	if(legal!=true){
+		cout << "illegal transposition sequence!\n";
+		cout << "vertices might be in the wrong order\n";
+		cout << "or there might be numerical errors in monodromy calculation.\n";
+	} else {
+		cout << "legal sequence.\n";
+	};
+	write_transposition_sequence(S);
+
 //	cout << "computing reset sequence. current sequence is\n";
 //	write_transposition_sequence(S);
 	
@@ -215,7 +251,7 @@ vector<braid> compute_reset_sequence(int d, vector<transposition> T){
 		} else {
 	//		cout << "at location " << 2*i << " looking for j<=" << i << ", k>" << i << "\n";
 			l=-1;
-			for(m=0;m<=i;m++){
+			for(m=0;m<=i;m++){	// find (j,k) with j as small as possible, and k>i
 	//			l=find_matching_transposition(S,2*i,i+1,-1,i,1);	
 				l=find_matching_transposition(S,2*i,m,0,i,1);
 				if(l!=-1){
@@ -236,35 +272,19 @@ vector<braid> compute_reset_sequence(int d, vector<transposition> T){
 			j=S[2*i].i;
 			k=S[2*i].j;
 	// S is in the form (i-1,i) . . . (0,1) (0,1) . . . (i-1,i) (j,k) *
-			if(j<i/2){
-				for(l=0;l<j+1;l++){	// rotate forwards j+1 times
-				//	cout << "performing rotation " << l << "\n";
-					b.i=i;
-					b.j=i-1;
-					b.over=true;
-					B.push_back(b);
-					operate(S,b);
-					b.i=i-1;
-					b.j=1-i;
-					b.over=true;
-					B.push_back(b);
-					operate(S,b);
-				};
-			} else {
-				for(l=0;l<j+1;l++){	// rotate backwards i-j-1 times
-				//	cout << "performing rotation " << l << "\n";
-					b.i=2*i-1;
-					b.j=1-i;
-					b.over=false;
-					B.push_back(b);
-					operate(S,b);
-					b.i=0;
-					b.j=i-1;
-					b.over=false;
-					B.push_back(b);
-					operate(S,b);
-				};			
-			};
+			for(l=0;l<j+1;l++){	// rotate forwards j+1 times
+			//	cout << "performing rotation " << l << "\n";
+				b.i=i;
+				b.j=i-1;
+				b.over=true;
+				B.push_back(b);
+				operate(S,b);
+				b.i=i-1;
+				b.j=1-i;
+				b.over=true;
+				B.push_back(b);
+				operate(S,b);
+			}; 
 	// S is in the form (j-1,j) . . . (j,j+1) (j,j+1) . . . (j-1,j) (j,k) *
 			P.i.clear();
 			for(l=0;l<d;l++){
@@ -343,6 +363,7 @@ vector<braid> compute_reset_sequence(int d, vector<transposition> T){
 		operate(S,b);
 	// S is in the form (i,i+1) (i-1,i) . . . (0,1) (0,1) . . . (i-1,i) (i,i+1) * 
 	};
+	write_transposition_sequence(S);
 	prune_braid_sequence(B,d);
 	cout << "reset sequence is \n";
 	write_braid_sequence(B);

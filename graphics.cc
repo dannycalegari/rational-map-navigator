@@ -31,7 +31,7 @@ void setup_graphics(void){
 	display_height = DisplayHeight(display, screen_num);
 	screen_num = DefaultScreen(display);  
 	width = 1280;
-	height = 680;
+	height = 700;
 	win = XCreateSimpleWindow(display, RootWindow(display, screen_num), 0, 0, width, 
 		height, border_width, BlackPixel(display, screen_num), WhitePixel(display, screen_num));
 	XSelectInput(display, win, ExposureMask | KeyPressMask | ButtonPressMask);
@@ -218,10 +218,18 @@ void rational_map::draw_PZCV(){	// graphical output routine
 	for(i=0;i<(int) Zeros.size();i++){
 		p=complex_to_point(stereo_point(Zeros[i]));
 		draw_thick_circle(p.x,p.y,1,(long) 0xFF0000);
+		T << i;
+		S=T.str();
+		XDrawString(display,win,gc,p.x+3,p.y-3,S.c_str(),strlen(S.c_str()));
+		T.str("");
 	};
 	for(i=0;i<(int) Poles.size();i++){
 		p=complex_to_point(stereo_point(Poles[i]));
 		draw_thick_circle(p.x,p.y,1,(long) 0x0000FF);
+		T << i;
+		S=T.str();
+		XDrawString(display,win,gc,p.x+3,p.y-3,S.c_str(),strlen(S.c_str()));
+		T.str("");
 	};
 	
 	if(ZP=='Z'){
@@ -323,42 +331,38 @@ void rational_map::steer_to_target(){
 	
 	int i,j;
 	complex<double> w, eta;
-	vector<complex<double> > PROX, VV, JIGGLE;
-	double SPEED, t;
+	vector<complex<double> > PROX;
+	double SPEED;
 
 	PROX.resize(0);
-	JIGGLE.resize(0);
 	
 	for(i=0;i<(int) V.size();i++){
 		PROX.push_back(1.0);
-		JIGGLE.push_back(1.0);
 	};
 	
 	j=0;
-	SPEED=0.1;		// fast but buggy; what is a good speed? 0.002? 0.00001?
+	SPEED=0.01;		// fast but buggy; what is a good speed? 0.002? 0.00001?
 	// Probably need to slow down and apply Mobius transformations to prevent collisions
 
 	STEER=PROX;
-	VV=PROX;
-	while(norm(STEER)>0.001){
-		t=3.0*norm(STEER)/(0.33333+norm(STEER));	// when we're close, we should go faster
+	while(norm(STEER)>0.05){
+//		t=3.0*(0.1+norm(STEER))/(0.33333+norm(STEER));	// when we're close, we should go faster
 
 		for(i=0;i<(int) V.size();i++){
 			STEER[i]=((TARGET[i]-V[i]));
-			VV[i]=V[i]+SPEED*STEER[i]/t;
 		};		
 		compute_Jacobian();
 		compute_adjust_vector();
 
-		M=M+SPEED*ADJUST[0]/t;
+		M=M+SPEED*ADJUST[0]/norm(STEER);
 		for(i=0;i<(int) Zeros.size();i++){
-			Zeros[i]=Zeros[i]+SPEED*ADJUST[i+1]/t;
+			Zeros[i]=Zeros[i]+SPEED*ADJUST[i+1]/norm(STEER);
 		};
 		for(i=0;i<(int) Poles.size();i++){
-			Poles[i]=Poles[i]+SPEED*ADJUST[i+Zeros.size()+1]/t;
+			Poles[i]=Poles[i]+SPEED*ADJUST[i+Zeros.size()+1]/norm(STEER);
 		};
 		compute_coefficients();
-		adjust_C_and_V();	// ideally now V=VV
+		adjust_C_and_V();	
 		Mobius();		// experimental; should comment this out
 
 
@@ -419,13 +423,14 @@ void rational_map::braid_critical_values(int i, int j, bool over){
 	w.real()=0;
 	w.imag()=TWOPI/(double) V.size();
 	eta=exp(w);	// 2d-2th root of unity
+	double t;
 	
 	// adjust radius of V[i]
 	
 	if(!over){	
-		set_target_radius(i,0.5);	// braid v_i under v_l
+		set_target_radius(i,0.3);	// braid v_i under v_l
 	} else {
-		set_target_radius(i,3.0);	// braid v_i over v_l
+		set_target_radius(i,2.0);	// braid v_i over v_l
 	};
 	steer_to_target();
 	
@@ -446,14 +451,15 @@ void rational_map::braid_critical_values(int i, int j, bool over){
 	
 	// adjust argument of V[i] |j| times (continuity)
 	
+	t=arg(V[i]);
 	if(j>0){
 		for(a=0;a<j;a++){
-			set_target_argument(i,arg(V[i])+TWOPI/(double) V.size());
+			set_target_argument(i,t+((double) (a+1) * TWOPI/(double) V.size()));
 			steer_to_target();
 		};
 	} else {
 		for(a=0;a>j;a--){
-			set_target_argument(i,arg(V[i])-TWOPI/(double) V.size());
+			set_target_argument(i,t+((double) (a-1) * TWOPI/(double) V.size()));
 			steer_to_target();
 		};	
 	};
@@ -494,7 +500,7 @@ void graphics_routine(rational_map &R, bool &finished){
 	point p;
 	vector<braid> B;
 	int i;
-		
+	
 	erase_field();
 	R.draw_PZCV();
 
@@ -609,6 +615,8 @@ void graphics_routine(rational_map &R, bool &finished){
 				R.compute_monodromy();
 				B=compute_reset_sequence((int) R.Zeros.size(), R.MONODROMY);
 				for(i=0;i<(int) B.size();i++){
+					cout << "performing braid " << i << " of " << (int) B.size() << "\n";
+					cout.flush();
 					R.braid_critical_values(B[i].i,B[i].j,B[i].over);
 				};
 				R.compute_monodromy();

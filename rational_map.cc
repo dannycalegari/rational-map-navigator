@@ -393,14 +393,16 @@ void rational_map::compute_monodromy(){			// compute monodromy around critical v
 	};
 
 	cout << "computing monodromy.\n";
+	/* Should check to make sure the argument of R(infty) is not of the form n2\pi/d. 
+	If it is, should steer along path slightly kinked away from zero. */
 	
 	for(i=0;i<(int) V.size();i++){	// ith critical value
 		v=V[i];
 		for(j=0;j<(int) Zeros.size();j++){
 			w=Zeros[j];
-			while(abs(EVAL(w)-v)>0.000000001){	// want to steer w towards v
+			while(abs(EVAL(w)-v)>0.00000001){	// want to steer w towards v
 				d=(D()).EVAL(w);	// derivative at w
-				w=w+((0.01)*(v-EVAL(w))/d);
+				w=w+(0.01*(v-EVAL(w))/d);
 				p=complex_to_point(stereo_point(w));
 				draw_point(p.x,p.y,0x100410);
 				p=complex_to_point(stereo_point(EVAL(w)));
@@ -408,9 +410,10 @@ void rational_map::compute_monodromy(){			// compute monodromy around critical v
 				draw_point(p.x,p.y,0x100410);
 			};
 			k=select_C(w); // C[k] is closest critical point to w.
-	//		cout << abs(w-C[k]) << " ";
-	//		cout << "considering whether monodromy[" << k << "] permutes zero " << j << "\n";
-			if(abs(w-C[k])<0.001){
+		//	cout << abs(w-C[k]) << " ";
+		//	cout << "considering whether monodromy[" << k << "] permutes zero " << j << "\n";
+			if(abs(w-C[k])<0.01){
+		//		cout << "it does!\n";
 				if(MONODROMY[k].i==-1){
 					MONODROMY[k].i=j;
 				} else {
