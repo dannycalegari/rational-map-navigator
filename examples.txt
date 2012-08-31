@@ -100,39 +100,49 @@ monodromy around critical value 7 is 2<->4
 
 degree 6 
 
-zero z_0 is -4 + 3 i
-zero z_1 is 4.83767 + 1.17127 i
-zero z_2 is 1.9335 + 2.76462 i
-zero z_3 is 0.568712 + 2.14905 i
-zero z_4 is 0.70067 + 0.61522 i
-zero z_5 is 0.95579 + 1.43251 i
-pole p_0 is 4 + 3 i
-pole p_1 is 0 + -5 i
-pole p_2 is 1.0877 + 2.83607 i
-pole p_3 is -0.259849 + 1.6487 i
-pole p_4 is 0.896122 + 1.43675 i
-pole p_5 is 1.49719 + 1.27434 i
-multiplier m is 1.00522 + -0.357962
-critical point 0 is 0.951917 + 1.26788 i
-critical point 1 is 0.537833 + 1.44995 i
-critical point 2 is 0.978649 + 1.60935 i
-critical point 3 is 1.32273 + 2.18874 i
-critical point 4 is -1.0065 + 0.143725 i
-critical point 5 is 2.84684 + 1.81783 i
-critical point 6 is 2.1873 + -0.129372 i
-critical point 7 is -0.0506214 + 2.83472 i
-critical point 8 is 1.63261 + 4.23801 i
-critical point 9 is 10.1439 + 6.24026 i
-critical value 0 is 1 + 4.57586e-08 i
-critical value 1 is 0.809017 + 0.587785 i
-critical value 2 is 0.309017 + 0.951056 i
-critical value 3 is -0.309017 + 0.951057 i
-critical value 4 is -0.809017 + 0.587785 i
-critical value 5 is -1 + 2.83457e-10 i
-critical value 6 is -0.809017 + -0.587785 i
-critical value 7 is -0.309017 + -0.951057 i
-critical value 8 is 0.309017 + -0.951057 i
-critical value 9 is 0.809017 + -0.587785 i
+zero z_0 is -2.54532 + 0.0287573 i
+zero z_1 is -2.42676 + 0.751246 i
+zero z_2 is -2.50888 + -0.0127005 i
+zero z_3 is 2.41526 + -1.19333 i
+zero z_4 is 2.49998 + 0.0154705 i
+zero z_5 is -2.42867 + -0.069803 i
+pole p_0 is 2.40422 + 1.22515 i
+pole p_1 is -2.52105 + -0.0236459 i
+pole p_2 is -2.55586 + -0.584694 i
+pole p_3 is -2.45232 + 0.207533 i
+pole p_4 is 2.5 + 6.77691e-21 i
+pole p_5 is -2.5 + -4.06576e-20 i
+multiplier m is -0.804535 + -0.651093
+critical point 0 is 2.59885 + 0.00782813 i
+critical point 1 is 2.40224 + 0.00752819 i
+critical point 2 is -2.51862 + -0.00350197 i
+critical point 3 is -2.13894 + 0.0522401 i
+critical point 4 is -0.503765 + -0.0062407 i
+critical point 5 is -2.46973 + 0.0411393 i
+critical point 6 is -12.5848 + 1.9856 i
+critical point 7 is -2.49641 + -0.0232493 i
+critical point 8 is -2.73579 + 0.145439 i
+critical point 9 is -2.56794 + -0.0767128 i
+critical value 0 is 1.00004 + -8.64875e-05 i
+critical value 1 is 0.809101 + 0.587742 i
+critical value 2 is 0.310538 + 0.94676 i
+critical value 3 is -0.308864 + 0.951138 i
+critical value 4 is -0.808981 + 0.587884 i
+critical value 5 is -1.00006 + 0.000150085 i
+critical value 6 is -0.846912 + -0.618026 i
+critical value 7 is -0.309287 + -0.952722 i
+critical value 8 is 0.308818 + -0.951145 i
+critical value 9 is 0.808934 + -0.587982 i
+monodromy around critical value 0 is 3<->4
+monodromy around critical value 1 is 3<->4
+monodromy around critical value 2 is 2<->2
+monodromy around critical value 3 is 1<->5
+monodromy around critical value 4 is 1<->3
+monodromy around critical value 5 is 0<->5
+monodromy around critical value 6 is 1<->3
+monodromy around critical value 7 is 2<->5
+monodromy around critical value 8 is 0<->1
+monodromy around critical value 9 is 0<->5
 
 
 degree 7

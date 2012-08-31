@@ -24,6 +24,7 @@ class rational_map{
 		
 		// FUNCTIONS
 		void initialize(int);				// initialize to "default" values; degree is specified
+		void read_map(ifstream &);			// initialize by reading values from a file
 		
 		complex<double> EVAL(complex<double> );		// evaluate function on complex number
 		complex<double> PREIMAGE(complex<double>, complex<double> );	// find inverse near prescribed seed value
@@ -47,6 +48,7 @@ class rational_map{
 		void compute_monodromy();			// compute monodromy around critical values along ``standard contours''
 
 		void initialize_perturbation_matrix();
+		void initialize_target();		// 
 		void compute_secant();			// original version of compute_Jacobian 
 		void compute_Jacobian();		// computes matrix PERTURB:=dV/d(m,Z,P) 
 		void compute_adjust_vector();	// solves PERTURB(ADJUST)=STEER for ADJUST
@@ -85,6 +87,7 @@ void rational_map::initialize(int d){
 	compute_coefficients();
 	compute_C_and_V();
 	initialize_perturbation_matrix();
+	initialize_target();
 	ZP='Z';			// select zero
 	ZP_index=0;		// select zero 0
 	V_index=0;		// select critical value 0
@@ -93,6 +96,59 @@ void rational_map::initialize(int d){
 	integral_curves=false;	// don't draw integral curves
 };
 
+void rational_map::read_map(ifstream &input_file){
+	int d,i;
+	complex<double> w;
+	double r,s;
+	input_file >> d;	// read degree
+	Zeros.resize(0);
+	Poles.resize(0);
+	C.resize(0);
+	V.resize(0);
+	for(i=0;i<d;i++){
+		input_file >> r;
+		input_file >> s;
+		w.real()=r;
+		w.imag()=s;
+		Zeros.push_back(w);
+	};
+	for(i=0;i<d;i++){
+		input_file >> r;
+		input_file >> s;
+		w.real()=r;
+		w.imag()=s;
+		Poles.push_back(w);
+	};
+	input_file >> r;
+	input_file >> s;
+	w.real()=r;
+	w.imag()=s;
+	M=w;
+	for(i=0;i<2*d-2;i++){
+		input_file >> r;
+		input_file >> s;
+		w.real()=r;
+		w.imag()=s;
+		C.push_back(w);
+	};
+	for(i=0;i<2*d-2;i++){
+		input_file >> r;
+		input_file >> s;
+		w.real()=r;
+		w.imag()=s;
+		V.push_back(w);
+	};
+	compute_coefficients();
+	adjust_C_and_V();
+	initialize_perturbation_matrix();
+	initialize_target();
+	ZP='Z';			// select zero
+	ZP_index=0;		// select zero 0
+	V_index=0;		// select critical value 0
+	
+	VF='X';	// don't draw vector field
+	integral_curves=false;	// don't draw integral curves
+};
 
 complex<double> rational_map::EVAL(complex<double> z){	// evaluate z
 	return(P(z)/Q(z));
@@ -400,7 +456,7 @@ void rational_map::compute_monodromy(){			// compute monodromy around critical v
 		v=V[i];
 		for(j=0;j<(int) Zeros.size();j++){
 			w=Zeros[j];
-			while(abs(EVAL(w)-v)>0.00000001){	// want to steer w towards v
+			while(abs(EVAL(w)-v)>0.0000000001){	// want to steer w towards v
 				d=(D()).EVAL(w);	// derivative at w
 				w=w+(0.01*(v-EVAL(w))/d);
 				p=complex_to_point(stereo_point(w));
@@ -437,6 +493,14 @@ void rational_map::initialize_perturbation_matrix(){
 	};
 	for(j=0;j<2*(int) Zeros.size()+1;j++){
 		PERTURB.push_back(COL);
+	};
+};
+
+void rational_map::initialize_target(){
+	int i;
+	TARGET.resize(0);
+	for(i=0;i<(int) V.size();i++){
+		TARGET.push_back(V[i]);
 	};
 };
 

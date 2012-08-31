@@ -341,7 +341,7 @@ void rational_map::steer_to_target(){
 	};
 	
 	j=0;
-	SPEED=0.01;		// fast but buggy; what is a good speed? 0.002? 0.00001?
+	SPEED=0.001;		// fast but buggy; what is a good speed? 0.002? 0.00001?
 	// Probably need to slow down and apply Mobius transformations to prevent collisions
 
 	STEER=PROX;

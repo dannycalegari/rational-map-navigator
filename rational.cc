@@ -56,13 +56,19 @@ int main(int argc, char *argv[]){
 	rational_map R;
 	bool finished;
 	int d;
+	ifstream map_input_file;
 		
-	cout << "Welcome to the rational map explorer!\n";
-	cout << "Enter degree of rational map:";
-	cin >> d;
-	cout << "Setting up initial zeros/poles.\n\n";
-	
-	R.initialize(d);
+	if (argc>1){
+		map_input_file.open(argv[1]);
+		R.read_map(map_input_file);
+		map_input_file.close();
+	} else {
+		cout << "Welcome to the rational map explorer!\n";
+		cout << "Enter degree of rational map:";
+		cin >> d;
+		cout << "Setting up initial zeros/poles.\n\n";
+		R.initialize(d);
+	};
 	
 	setup_graphics();
 	setup_font();
