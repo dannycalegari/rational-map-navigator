@@ -453,9 +453,9 @@ void rational_map::compute_monodromy(){			// compute monodromy around critical v
 	If it is, should steer along path slightly kinked away from zero. */
 	
 	for(i=0;i<(int) V.size();i++){	// ith critical value
-		v=V[i];
 		for(j=0;j<(int) Zeros.size();j++){
 			w=Zeros[j];
+			v=V[i]*(1.0-0.1*I);
 			while(abs(EVAL(w)-v)>0.0000000001){	// want to steer w towards v
 				d=(D()).EVAL(w);	// derivative at w
 				w=w+(0.01*(v-EVAL(w))/d);
@@ -465,16 +465,43 @@ void rational_map::compute_monodromy(){			// compute monodromy around critical v
 				p.x=p.x+640;
 				draw_point(p.x,p.y,0x100410);
 			};
-			k=select_C(w); // C[k] is closest critical point to w.
-		//	cout << abs(w-C[k]) << " ";
-		//	cout << "considering whether monodromy[" << k << "] permutes zero " << j << "\n";
-			if(abs(w-C[k])<0.01){
-		//		cout << "it does!\n";
-				if(MONODROMY[k].i==-1){
-					MONODROMY[k].i=j;
-				} else {
-					MONODROMY[k].j=j;
-				};
+			v=V[i]*(1.1);
+			while(abs(EVAL(w)-v)>0.0000000001){	// want to steer w towards v
+				d=(D()).EVAL(w);	// derivative at w
+				w=w+(0.01*(v-EVAL(w))/d);
+				p=complex_to_point(stereo_point(w));
+				draw_point(p.x,p.y,0x100410);
+				p=complex_to_point(stereo_point(EVAL(w)));
+				p.x=p.x+640;
+				draw_point(p.x,p.y,0x100410);
+			};			
+			v=V[i]*(1.0+0.1*I);
+			while(abs(EVAL(w)-v)>0.0000000001){	// want to steer w towards v
+				d=(D()).EVAL(w);	// derivative at w
+				w=w+(0.01*(v-EVAL(w))/d);
+				p=complex_to_point(stereo_point(w));
+				draw_point(p.x,p.y,0x100410);
+				p=complex_to_point(stereo_point(EVAL(w)));
+				p.x=p.x+640;
+				draw_point(p.x,p.y,0x100410);
+			};
+			v=0.0;
+			while(abs(EVAL(w)-v)>0.0000000001){	// want to steer w towards v
+				d=(D()).EVAL(w);	// derivative at w
+				w=w+(0.01*(v-EVAL(w))/d);
+				p=complex_to_point(stereo_point(w));
+				draw_point(p.x,p.y,0x100410);
+				p=complex_to_point(stereo_point(EVAL(w)));
+				p.x=p.x+640;
+				draw_point(p.x,p.y,0x100410);
+			};
+
+			select_ZP(w); // Zeros[k] is closest zero to w.
+			k=ZP_index;
+			if(k!=j && ZP=='Z'){
+				MONODROMY[i].i=j;
+				MONODROMY[i].j=k;
+				j=(int) Zeros.size();
 			};
 		};
 	};
