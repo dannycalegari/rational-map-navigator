@@ -23,6 +23,7 @@
 #include <vector>
 #include <complex>
 #include <sstream>
+#include <limits>
 
 #define debug 0
 #define verbose 1
@@ -57,7 +58,12 @@ int main(int argc, char *argv[]){
 	bool finished;
 	int d;
 	ifstream map_input_file;
-		
+	
+	cout << numeric_limits<float>::digits << "\n";
+    cout << numeric_limits<double>::digits << "\n";
+    cout << numeric_limits<long double>::digits << "\n";
+	cout << numeric_limits<__float128>::digits << "\n";
+	
 	if (argc>1){
 		map_input_file.open(argv[1]);
 		R.read_map(map_input_file);

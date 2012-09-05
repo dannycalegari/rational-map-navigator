@@ -3,7 +3,7 @@
 int closest_entry(vector<complex<double> > V, complex<double> z){	
 	// returns i minimizing abs(V[i]-z)
 	int i,j;
-	double t;
+	long double t;
 	i=0;
 	t=abs(V[0]-z);
 	for(j=0;j<(int) V.size();j++){
@@ -45,7 +45,7 @@ vector<complex<double> >  invert_matrix(vector< vector<complex<double> > > N, ve
 	
 	int rows, cols;
 	int j,i,k,m;
-	double t;
+	long double t;
 	vector<complex<double> > w;	// swap column
 	complex<double> z;	// swap complex
 	complex<double> l;	

@@ -14,9 +14,9 @@ real_polynomial D(real_polynomial P){
 	return(Q);
 };
 
-double EVAL(real_polynomial P, double t){
+long double EVAL(real_polynomial P, long double t){
 	int i;	
-	double s;
+	long double s;
 	s=0.0;
 	for(i=(int) P.a.size()-1;i>=0;i--){
 		s=(s*t) + P.a[i];
@@ -24,13 +24,13 @@ double EVAL(real_polynomial P, double t){
 	return(s);	
 };
 
-double find_real_positive_simple_root(real_polynomial P){
+long double find_real_positive_simple_root(real_polynomial P){
 	real_polynomial DP;
 	DP=D(P);	// derivative
-	double t,u;
+	long double t,u;
 	t=0.0;
 	u=1.0;
-	while(EVAL(P,t)*EVAL(P,u)>= 0.0){	// double u until the root is between t and u
+	while(EVAL(P,t)*EVAL(P,u)>= 0.0){	// long double u until the root is between t and u
 		u=u*2.0;
 	};
 	while(EVAL(P,u)>0.0001){	// don't need much accuracy here.

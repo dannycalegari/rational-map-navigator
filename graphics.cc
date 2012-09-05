@@ -334,17 +334,16 @@ void rational_map::steer_to_target(){
 	vector<complex<double> > PROX;
 	double SPEED;
 
-	PROX.resize(0);
+	STEER.resize(0);
 	
 	for(i=0;i<(int) V.size();i++){
-		PROX.push_back(1.0);
+		STEER.push_back(1.0);
 	};
 	
 	j=0;
 	SPEED=0.1;		// fast but buggy; what is a good speed? 0.002? 0.00001?
 	// Probably need to slow down and apply Mobius transformations to prevent collisions
 
-	STEER=PROX;
 	while(norm(STEER)>0.05){
 //		t=3.0*(0.1+norm(STEER))/(0.33333+norm(STEER));	// when we're close, we should go faster
 
