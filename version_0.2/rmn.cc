@@ -2,7 +2,7 @@
 
 	Rational Map Navigator version 0.02
 
-	September 5 2012
+	September 1 2012
 
 	Copyright Danny Calegari
 
@@ -32,7 +32,7 @@ using namespace std;
 #define debug 	1							//	debug is true
 #define verbose 1							//	verbose is true by default
 #define PI 		3.14159265358979
-#define TWOPI		6.28318530717959
+#define TWOPI	6.28318530717959
 #define ACC		0.00000000001				// accuracy 1.0e-11
 #define cpx		complex<double>				// complex number
 #define cvec 	vector<cpx >	// vector of complex numbers
@@ -54,7 +54,9 @@ cpx I (0.0,1.0);
 #include "polynomial.cc";
 #include "roots.cc";
 #include "rational_map.cc";
-#include "benchmark.cc";
+#include "user_interface.cc";
+
+// #include "benchmark.cc";
 // #include "partial_fraction.cc";
 
 int main(int argc, char *argv[]){ 

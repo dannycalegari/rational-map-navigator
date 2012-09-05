@@ -1,8 +1,11 @@
 /* rational_map.cc definitions and functions */
 
 struct graphics_state{	// stuff we need to know for graphics
-	bool user_control;
-	bool labels_on;
+	bool user_control;	// is it waiting for user prompt?
+	bool labels_on;		// are there labels on the points?
+	char doing;			// what are we currently doing?	
+		// U = user control, F = flow to roots of unity, I = insert zero/pole
+	double distance;	// while flowing, distance to value
 };
 
 class rational_map{
@@ -46,6 +49,7 @@ void rational_map::initialize(){
 	Q.resize(0);
 	G.user_control=false;
 	G.labels_on=true;
+	G.doing='U';
 };
 
 void rational_map::compute_P_and_Q(){
@@ -147,6 +151,8 @@ void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straig
 	double SPEED;
 	int i,j;
 	
+	G.doing='F';	// flow to value
+	
 	L=V-VALS;	// this is the direction we want to move
 	j=0;
 	while(norm(L)>accuracy){
@@ -170,6 +176,7 @@ void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straig
 		compute_critical_values();
 
 		L=V-VALS;	// this is the direction we want to move
+		G.distance=sqrt(norm(L));
 		if(j>10000){
 			cout << "numerical error; more than 10000 steps to flow.\n";
 			cout << "norm at termination " << norm(L) << "\n";
@@ -177,6 +184,7 @@ void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straig
 		};
 		j++;
 	};
+	G.doing='U';	// user control
 	draw_state();
 };
 
@@ -187,12 +195,17 @@ void rational_map::draw_state(){
 	stringstream T;
 	
 	erase_field();
+	
+	// draw outer circles
 
 	p.x=320;
 	p.y=320;
 	draw_circle(p,300,0xAAAAAA);
 	p.x=p.x+620;
 	draw_circle(p,300,0xAAAAAA);
+	
+	// draw Z/P/C/V
+	
 	for(i=0;i<(int) ZERO.size();i++){
 		p=cpx_to_point(ZERO[i]);
 		draw_concentric_circles(p,2,0x550000);
@@ -222,14 +235,33 @@ void rational_map::draw_state(){
 			draw_label(p,i,0x550055);
 		};
 	};
-	if(G.labels_on){
-		T << "labels are on";
+	
+	// write state
+	
+	T << "Degree " << deg(P) << ".  ";
+	
+	switch(G.doing){
+		case 'F':
+			T << "Flowing critical values to roots of unity. Distance is " << G.distance << ".  ";
+			break;
+		case 'U':
+			T << "User control.  ";
+			break;
+		case 'I':
+			T << "Insert zero/pole.  ";
+			break;
+		default:
+			break;
 	};
+	
+	if(G.labels_on){
+		T << "Labels are on.";
+	};
+		
 	p.x=30;
-	p.y=650;
+	p.y=660;
 	draw_text(p,T,0x000000);
 	T.str("");
-
 	
 	XFlush(display);
 };

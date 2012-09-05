@@ -10,7 +10,7 @@ void benchmark_test(){	// benchmark tests
 	clock_t start;
 	double accuracy;
 	
-	for(d=3;d<10;d++){
+	for(d=3;d<11;d++){
 		cout << "\n";
 		cout << "benchmarks for rational map of degree " << d << "\n";
 		accuracy=1.0;
@@ -66,7 +66,10 @@ void benchmark_test(){	// benchmark tests
 			};
 			R.flow_VALS_to(V,accuracy);
 			cout << "time: " << ( clock() - start ) / (double) CLOCKS_PER_SEC << "\n";
+			R.G.user_control=true;
+			R.draw_state();
 			usleep(1000000);
+			R.G.user_control=false;
 		};
 	};
 };
