@@ -185,7 +185,7 @@ void rational_map::jiggle(cvec V){	// try to perturb Z/P to move towards V
 };
 
 void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straight line to V
-	cvec K,L;
+	cvec K,L,VV;
 	cmat J;
 	double SPEED;
 	int i,j;
@@ -224,6 +224,33 @@ void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straig
 			cout << "norm at termination " << norm(L) << "\n";
 			cout << "flowing to ";
 			vwrite(V);
+			assert(1==0);
+		};
+		if(norm(VALS)>10000){	// something's wrong here
+			cout << "norm blow up! Jacobian J is ";
+			J=JAC();	// this is the Jacobian
+			mwrite(J);
+			cout << "direction L we want to move is ";
+			vwrite(L);
+			K=INV(J,L);		// J*K=L
+			cout << "inverting JAC gives K ";
+			vwrite(K);
+			cout << "J*K = ";
+			vwrite(J*K);
+			VV=VALS;
+			SPEED=SPEED/100000.0;
+			for(i=1;i<(int) ZERO.size();i++){
+				ZERO[i]=ZERO[i]+K[i-1]*SPEED;
+			};
+			for(i=0;i<(int) POLE.size();i++){
+				POLE[i]=POLE[i]+K[i-1+(int) ZERO.size()]*SPEED;
+			};
+			compute_P_and_Q();
+			compute_critical_points(0.000000000000000001);
+			compute_critical_values();
+			cout << "actual direction of motion is ";
+			vwrite((VALS-VV)*(1.0/SPEED));
+			
 			assert(1==0);
 		};
 		j++;
