@@ -129,7 +129,7 @@ cvec INV(cmat M, cvec L){	// finds vector U[0] st. M*U=L. If M is invertible, th
 		k=i;
 		t=abs(N[i][k]);
 		for(j=i;j<cols;j++){		// find j>=i maximizing N[i][j]
-			if(abs(N[i][j])<t){
+			if(abs(N[i][j])>t){
 				k=j;
 				t=abs(N[i][j]);
 			};

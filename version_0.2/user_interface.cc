@@ -6,6 +6,7 @@ void rational_map::user_interface(){
 	cvec V;
 	int i;
 	cpx u;
+	ofstream output_file;
 	
 	finished=false;
 	while(finished==false){
@@ -61,6 +62,12 @@ void rational_map::user_interface(){
                 	draw_state();
                 	break;
                 };
+                if(XLookupKeysym(&report.xkey, 0) == XK_w){ // write to file
+                	output_file.open("output_file.txt");
+					write_to_file(output_file);
+					output_file.close();
+					break;
+				};
             default:
             	break;
         };

@@ -72,6 +72,7 @@ int main(int argc, char *argv[]){
 	if(argc>1){
 		input_file.open(argv[1]);
 		R.read_from_file(input_file);
+		input_file.close();
 	} else {
 		R.initialize();
 	};

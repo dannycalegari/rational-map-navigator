@@ -56,7 +56,6 @@ void benchmark_test(){	// benchmark tests
 			};
 			cout << "time: " << ( clock() - start ) / (double) CLOCKS_PER_SEC << "\n";
 
-			
 			cout << "computing flow to roots of unity.\n";
 			start=clock();
 			V.resize(0);

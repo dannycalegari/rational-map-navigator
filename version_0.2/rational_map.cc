@@ -32,6 +32,7 @@ class rational_map{
 		void compute_P_and_Q();			// would we ever compute P but not Q?
 		void compute_critical_points(double);	// parameter for accuracy
 		void compute_critical_values();
+		void normalize();	// move zeros/poles close to unit circle
 		
 		cpx E(cpx);			// value of R(w)
 		cvec E(cvec);		// vector of values of R(W[i])
@@ -39,10 +40,11 @@ class rational_map{
 		cvec DE(cvec);		// vector of values of R(W[i])
 		cmat JAC();			// dV/d{M,Z,P}
 		
+		void jiggle(cvec);		// try to perturb z/p to move towards specific value
 		void flow_VALS_to(cvec, double);	// flow VALS in straight line to specific value
 		void draw_state();
 		void read_from_file(ifstream &);		// read data from file
-		void write_to_file(ofstream);		// write data to file
+		void write_to_file(ofstream &);		// write data to file
 		void user_interface();			// top-level user interaction routine
 		void insert_zp();			// insert zero/pole pair
 		void magnify();				// magnifying glass
@@ -80,6 +82,29 @@ void rational_map::compute_critical_values(){
 	};
 };
 
+void rational_map::normalize(){		// move zeros/poles close to unit circle
+	double t;
+	int i;
+	t=1.0;
+	for(i=1;i<(int) ZERO.size();i++){
+		t=t*abs(ZERO[i]);
+	};
+	for(i=0;i<(int) POLE.size();i++){
+		t=t*abs(POLE[i]);
+	};
+	if(t>1.0){
+		t=0.999;
+	} else {
+		t=1.001;
+	};
+   	ZERO=ZERO*t;
+    POLE=POLE*t;
+    M=M/t;
+	compute_P_and_Q();
+	compute_critical_points(0.00000000000000001);
+	compute_critical_values();
+};
+
 cpx rational_map::E(cpx w){
 	return(EVAL(P,w)/EVAL(Q,w));
 };
@@ -95,7 +120,7 @@ cvec rational_map::E(cvec W){
 };
 
 cpx rational_map::DE(cpx w){
-//	return(EVAL(Wronskian(P,Q),w)/EVAL(Q*Q,w)); faster evaluation below
+//	return(EVAL(Wronskian(P,Q),w)/EVAL(Q*Q,w)); // faster evaluation below
 	cpx u;
 	u=EVAL(Q,w);
 	return((DEVAL(P,w)*u - EVAL(P,w)*DEVAL(Q,w))/(u*u));
@@ -135,6 +160,7 @@ cmat rational_map::JAC(){		// dV/d{Z,P}
     
 	for(i=0;i<(int) CRIT.size();i++){	// for each critical point
 		ROW.resize(0);
+//		ROW.push_back(CRIT[i]/M);
     	u=DDEVAL(P,CRIT[i])*EVAL(Q,CRIT[i])-EVAL(P,CRIT[i])*DDEVAL(Q,CRIT[i]);	// D(W)(CRIT[i]);
     	v=EVAL(P,CRIT[i])*EVAL(Q,CRIT[i])*DE(CRIT[i])/u;
 	   	c=E(CRIT[i]);
@@ -143,7 +169,7 @@ cmat rational_map::JAC(){		// dV/d{Z,P}
             w=w-c/(CRIT[i]-ZERO[j]);  
             ROW.push_back(w);		
 		};
-		for(j=0;j<(int) POLE.size();j++){	// last POLE is infinity (omitted)
+		for(j=0;j<(int) POLE.size();j++){	// ``-1th'' POLE is infinity (omitted)
    			w=v/((CRIT[i]-POLE[j])*(CRIT[i]-POLE[j]));
             w=w-c/(CRIT[i]-POLE[j]); 
             ROW.push_back(-w);			
@@ -152,6 +178,10 @@ cmat rational_map::JAC(){		// dV/d{Z,P}
 	};
 	
 	return(JAC);
+};
+
+void rational_map::jiggle(cvec V){	// try to perturb Z/P to move towards V
+
 };
 
 void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straight line to V
@@ -163,15 +193,19 @@ void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straig
 	L=V-VALS;	// this is the direction we want to move
 	j=0;
 	while(norm(L)>accuracy){
-		if(j%10==0){
+		if(j%10==1){
 			draw_state();
 		};
 		J=JAC();	// this is the Jacobian
 		K=INV(J,L);		// J*K=L
-		SPEED=0.01/sqrt(norm(L));
-		if(SPEED>1.0){
-			SPEED=1.0;
+		SPEED=0.05/sqrt(norm(L));
+		if(SPEED>0.1){
+			SPEED=0.1;
 		};
+		if(SPEED<0.001){
+			SPEED=0.001;
+		};
+//		M=M+K[0]*SPEED;
 		for(i=1;i<(int) ZERO.size();i++){
 			ZERO[i]=ZERO[i]+K[i-1]*SPEED;
 		};
@@ -179,14 +213,17 @@ void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straig
 			POLE[i]=POLE[i]+K[i-1+(int) ZERO.size()]*SPEED;
 		};
 		compute_P_and_Q();
-		compute_critical_points(accuracy);
+		compute_critical_points(0.000000000000000001);
 		compute_critical_values();
+//		normalize();
 
 		L=V-VALS;	// this is the direction we want to move
 		G.distance=sqrt(norm(L));
 		if(j>10000){
 			cout << "numerical error; more than 10000 steps to flow.\n";
 			cout << "norm at termination " << norm(L) << "\n";
+			cout << "flowing to ";
+			vwrite(V);
 			assert(1==0);
 		};
 		j++;

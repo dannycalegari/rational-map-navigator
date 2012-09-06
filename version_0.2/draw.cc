@@ -51,6 +51,10 @@ void rational_map::draw_state(){
 		p.y=p.y+40;
 		draw_text(p,T,0x000000);
 		T.str("");					
+		T << "Type [w] to write to file.";
+		p.y=p.y+40;
+		draw_text(p,T,0x000000);
+		T.str("");
 		T << "Type [q] to quit.";
 		p.y=p.y+40;
 		draw_text(p,T,0x000000);

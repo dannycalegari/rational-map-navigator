@@ -34,6 +34,19 @@ void rational_map::read_from_file(ifstream &input_file){		// read data from file
 };
 
 
-void rational_map::write_to_file(ofstream output_file){		// write data to file
+void rational_map::write_to_file(ofstream &output_file){		// write data to file
+	int d,i;
+	d=(int) ZERO.size();
+	output_file << d;	// degree
+	output_file << "\n";
+	for(i=1;i<d;i++){
+		output_file << ZERO[i].real() << "   " << ZERO[i].imag() << "\n";
+	};
+	output_file << "\n";
+	for(i=0;i<d-1;i++){
+		output_file << POLE[i].real() << "   " << POLE[i].imag() << "\n";
+	};
+	output_file << "\n";
 
+	output_file << M.real() << "   " << M.imag() << "\n";	
 };
