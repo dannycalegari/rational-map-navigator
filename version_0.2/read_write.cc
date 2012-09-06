@@ -38,7 +38,7 @@ void rational_map::write_to_file(ofstream &output_file){		// write data to file
 	int d,i;
 	d=(int) ZERO.size();
 	output_file << d;	// degree
-	output_file << "\n";
+	output_file << "\n\n";
 	for(i=1;i<d;i++){
 		output_file << ZERO[i].real() << "   " << ZERO[i].imag() << "\n";
 	};

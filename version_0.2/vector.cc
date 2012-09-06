@@ -47,6 +47,7 @@ void match_nearby(cvec &L, cvec M){	// adjusts the values of L to nearest distin
 	cvec N;
 	N=M;
 	int i,j;
+	cpx v;
 	for(i=0;i<(int) L.size();i++){
 		j=closest_match(L[i],N);
 		L[i]=N[j];

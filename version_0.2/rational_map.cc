@@ -73,15 +73,25 @@ void rational_map::compute_critical_points(double accuracy){
 };
 
 void rational_map::compute_critical_values(){
-	cvec TEMP_VALS;
+	VALS = rational_map::E(CRIT);
+		/* tracking is done poorly.
+
+	int i,j;
+	cvec TEMP_VALS, TEMP_CRIT;
 	if((int) VALS.size()==0){	// first time?
 		VALS = rational_map::E(CRIT);
 	} else {
 		VALS = rational_map::E(CRIT);
-
-	//	TEMP_VALS = rational_map::E(CRIT);
-	//	match_nearby(VALS,TEMP_VALS);
+		TEMP_VALS = rational_map::E(CRIT);
+		match_nearby(VALS,TEMP_VALS);	// permutes TEMP_VALS to be near VALS
+		TEMP_CRIT=CRIT;
+		for(i=0;i<(int) TEMP_CRIT.size();i++){
+			j=closest_match(E(TEMP_CRIT[i]),VALS);
+			CRIT[j]=TEMP_CRIT[i];
+		};
 	};
+			*/
+
 };
 
 void rational_map::normalize(){		// move zeros/poles close to unit circle
@@ -200,7 +210,7 @@ void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straig
 		};
 		J=JAC();	// this is the Jacobian
 		K=INV(J,L);		// J*K=L
-		SPEED=0.05/sqrt(norm(L));
+		SPEED=0.5/sqrt(norm(L));
 		if(SPEED>0.1){
 			SPEED=0.1;
 		};
@@ -217,7 +227,7 @@ void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straig
 		compute_P_and_Q();
 		compute_critical_points(0.000000000000000001);
 		compute_critical_values();
-		normalize();
+//		normalize();
 
 		L=V-VALS;	// this is the direction we want to move
 		G.distance=sqrt(norm(L));
@@ -228,7 +238,7 @@ void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straig
 			vwrite(V);
 			assert(1==0);
 		};
-		if(norm(VALS)>10000){	// something's wrong here
+		if(norm(VALS)>1000000){	// something's wrong here
 			cout << "norm blow up! Jacobian J is ";
 			J=JAC();	// this is the Jacobian
 			mwrite(J);
