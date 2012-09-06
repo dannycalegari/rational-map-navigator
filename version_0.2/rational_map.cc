@@ -211,12 +211,12 @@ void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straig
 		};
 		J=JAC();	// this is the Jacobian
 		K=INV(J,L);		// J*K=L
-		SPEED=0.5/sqrt(norm(L));
+		SPEED=0.01/sqrt(norm(L));
 		if(SPEED>0.1){
 			SPEED=0.1;
 		};
-		if(SPEED<0.001){
-			SPEED=0.001;
+		if(SPEED<0.00001){
+			SPEED=0.00001;
 		};
 //		M=M+K[0]*SPEED;
 		for(i=1;i<(int) ZERO.size();i++){
@@ -273,5 +273,75 @@ void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straig
 		};
 		j++;
 	};
+};
+
+void rational_map::do_braid(braid b){
+	cvec V;
+	cpx u,v;
+	int i,ii,ij,e;
+	e=(int) VALS.size();
+	u=exp(TWOPI*I/(double) e);	// root of unity
+	
+	V=VALS;
+	if(b.over){		// push V[b.i] in or out
+		V[b.i]=V[b.i]*2.0;
+	} else {
+		V[b.i]=V[b.i]*0.5;
+	};
+	flow_VALS_to(V,0.001);	// not much accuracy needed
+	
+	if(b.j>0){		// rotate intervening braids
+		for(i=1;i<=b.j;i++){
+			ii=(b.i+i)%e;
+			V[ii]=V[ii]/u;
+		};
+	} else {
+		for(i=-1;i>=b.j;i--){
+			ii=(b.i+i+e)%e;
+			V[ii]=V[ii]*u;
+		};
+	};
+	flow_VALS_to(V,0.001);	// not much accuracy needed
+	
+	if(b.j>0){		// rotate b.i
+		for(i=1;i<=b.j;i++){
+			V[b.i]=V[b.i]*u;
+			flow_VALS_to(V,0.001);	// not much accuracy needed
+		};
+	} else {
+		for(i=-1;i>=b.j;i--){
+			V[b.i]=V[b.i]/u;
+			flow_VALS_to(V,0.001);	// not much accuracy needed
+		};
+	};	
+	
+	V[b.i]=V[b.i]/abs(V[b.i]);		// push V[b.i] out or in
+	flow_VALS_to(V,0.001);	// not much accuracy needed
+
+
+	if(b.j>0){		// reorder indices
+		u=VALS[b.i];
+		v=CRIT[b.i];
+		for(i=1;i<=b.j;i++){
+			ii=(b.i+i+e)%e;
+			ij=(b.i+i-1+e)%e;
+			VALS[ij]=VALS[ii];
+			CRIT[ij]=CRIT[ii];
+		};
+		VALS[(b.i+b.j)%e]=u;
+		CRIT[(b.i+b.j)%e]=v;
+	} else {
+		u=VALS[b.i];
+		v=CRIT[b.i];
+		for(i=-1;i>=b.j;i--){
+			ii=(b.i+i+e)%e;
+			ij=(b.i+i+1+e)%e;
+			VALS[ij]=VALS[ii];
+			CRIT[ij]=CRIT[ii];
+		};
+		VALS[(b.i+b.j+e)%e]=u;
+		CRIT[(b.i+b.j+e)%e]=v;		
+	};
+	draw_state();
 };
 

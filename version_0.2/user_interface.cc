@@ -7,6 +7,7 @@ void rational_map::user_interface(){
 	int i;
 	cpx u;
 	ofstream output_file;
+	braid b;
 	
 	finished=false;
 	while(finished==false){
@@ -66,6 +67,13 @@ void rational_map::user_interface(){
                 	output_file.open("output_file.txt");
 					write_to_file(output_file);
 					output_file.close();
+					break;
+				};
+				if(XLookupKeysym(&report.xkey, 0) == XK_b){	// do braid
+					b.i=2;
+					b.j=-5;
+					b.over=false;
+					do_braid(b);
 					break;
 				};
             default:
