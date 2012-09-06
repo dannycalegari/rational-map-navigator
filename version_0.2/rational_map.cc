@@ -77,8 +77,10 @@ void rational_map::compute_critical_values(){
 	if((int) VALS.size()==0){	// first time?
 		VALS = rational_map::E(CRIT);
 	} else {
-		TEMP_VALS = rational_map::E(CRIT);
-		match_nearby(VALS,TEMP_VALS);
+		VALS = rational_map::E(CRIT);
+
+	//	TEMP_VALS = rational_map::E(CRIT);
+	//	match_nearby(VALS,TEMP_VALS);
 	};
 };
 
@@ -93,9 +95,9 @@ void rational_map::normalize(){		// move zeros/poles close to unit circle
 		t=t*abs(POLE[i]);
 	};
 	if(t>1.0){
-		t=0.999;
+		t=0.99;
 	} else {
-		t=1.001;
+		t=1.01;
 	};
    	ZERO=ZERO*t;
     POLE=POLE*t;
@@ -215,7 +217,7 @@ void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straig
 		compute_P_and_Q();
 		compute_critical_points(0.000000000000000001);
 		compute_critical_values();
-//		normalize();
+		normalize();
 
 		L=V-VALS;	// this is the direction we want to move
 		G.distance=sqrt(norm(L));
@@ -251,6 +253,11 @@ void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straig
 			cout << "actual direction of motion is ";
 			vwrite((VALS-VV)*(1.0/SPEED));
 			
+			cout << "sanity check. \n";
+			cout << "VALS ";
+			vwrite(VALS);
+			cout << "E(CRIT) ";
+			vwrite(E(CRIT));
 			assert(1==0);
 		};
 		j++;
