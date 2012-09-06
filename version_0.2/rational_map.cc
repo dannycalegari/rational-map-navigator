@@ -4,14 +4,18 @@ struct graphics_state{	// stuff we need to know for graphics
 	bool user_control;	// is it waiting for user prompt?
 	bool labels_on;		// are there labels on the points?
 	char doing;			// what are we currently doing?	
-		// U = user control, F = flow to roots of unity, I = insert zero/pole
+		// U = user control, F = flow to roots of unity, I = insert zero/pole, H = help
+		// M = magnifying glass, S = select Z/P/V
 	double distance;	// while flowing, distance to value
+	cpx insert_point;	// center of zero/pole pair
+	cpx zero_point;	// zero of zero/pole pair
+	point magnify_location;	// location of magnifying glass
 };
 
 class rational_map{
 	// R(z) = M.(z-ZERO[0]).(z-ZERO[1]). . . (z-ZERO[d-1])/(z-POLE[0]). . .(z-POLE[d-2])
 	//		= M.P(z)/Q(z)
-	// where ZERO[d-1]=0
+	// where ZERO[0]=0
 	// and R(1)=1, so M=Q(1)/P(1)
 
 	public:
@@ -37,6 +41,11 @@ class rational_map{
 		
 		void flow_VALS_to(cvec, double);	// flow VALS in straight line to specific value
 		void draw_state();
+		void read_from_file(ifstream &);		// read data from file
+		void write_to_file(ofstream);		// write data to file
+		void user_interface();			// top-level user interaction routine
+		void insert_zp();			// insert zero/pole pair
+		void magnify();				// magnifying glass
 };
 
 void rational_map::initialize(){
@@ -129,7 +138,7 @@ cmat rational_map::JAC(){		// dV/d{Z,P}
     	u=DDEVAL(P,CRIT[i])*EVAL(Q,CRIT[i])-EVAL(P,CRIT[i])*DDEVAL(Q,CRIT[i]);	// D(W)(CRIT[i]);
     	v=EVAL(P,CRIT[i])*EVAL(Q,CRIT[i])*DE(CRIT[i])/u;
 	   	c=E(CRIT[i]);
-		for(j=0;j<(int) ZERO.size()-1;j++){	// last ZERO is fixed at 0
+		for(j=1;j<(int) ZERO.size();j++){	// first ZERO is fixed at 0
 			w=v/((CRIT[i]-ZERO[j])*(CRIT[i]-ZERO[j]));
             w=w-c/(CRIT[i]-ZERO[j]);  
             ROW.push_back(w);		
@@ -150,9 +159,7 @@ void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straig
 	cmat J;
 	double SPEED;
 	int i,j;
-	
-	G.doing='F';	// flow to value
-	
+		
 	L=V-VALS;	// this is the direction we want to move
 	j=0;
 	while(norm(L)>accuracy){
@@ -165,8 +172,8 @@ void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straig
 		if(SPEED>1.0){
 			SPEED=1.0;
 		};
-		for(i=0;i<(int) ZERO.size()-1;i++){
-			ZERO[i]=ZERO[i]+K[i]*SPEED;
+		for(i=1;i<(int) ZERO.size();i++){
+			ZERO[i]=ZERO[i]+K[i-1]*SPEED;
 		};
 		for(i=0;i<(int) POLE.size();i++){
 			POLE[i]=POLE[i]+K[i-1+(int) ZERO.size()]*SPEED;
@@ -184,84 +191,5 @@ void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straig
 		};
 		j++;
 	};
-	G.doing='U';	// user control
-	draw_state();
 };
 
-void rational_map::draw_state(){
-	int i;
-	cpx v;
-	point p;
-	stringstream T;
-	
-	erase_field();
-	
-	// draw outer circles
-
-	p.x=320;
-	p.y=320;
-	draw_circle(p,300,0xAAAAAA);
-	p.x=p.x+620;
-	draw_circle(p,300,0xAAAAAA);
-	
-	// draw Z/P/C/V
-	
-	for(i=0;i<(int) ZERO.size();i++){
-		p=cpx_to_point(ZERO[i]);
-		draw_concentric_circles(p,2,0x550000);
-		if(G.labels_on){
-			draw_label(p,i,0x550000);
-		};
-	};
-	for(i=0;i<(int) POLE.size();i++){
-		p=cpx_to_point(POLE[i]);
-		draw_concentric_circles(p,2,0x000055);
-		if(G.labels_on){
-			draw_label(p,i,0x000055);
-		};
-	};
-	for(i=0;i<(int) CRIT.size();i++){
-		p=cpx_to_point(CRIT[i]);
-		draw_concentric_circles(p,2,0x005500);
-		if(G.labels_on){
-			draw_label(p,i,0x005500);
-		};
-	};
-	for(i=0;i<(int) VALS.size();i++){
-		p=cpx_to_point(VALS[i]);
-		p.x=p.x+620;
-		draw_concentric_circles(p,2,0x550055);
-		if(G.labels_on){
-			draw_label(p,i,0x550055);
-		};
-	};
-	
-	// write state
-	
-	T << "Degree " << deg(P) << ".  ";
-	
-	switch(G.doing){
-		case 'F':
-			T << "Flowing critical values to roots of unity. Distance is " << G.distance << ".  ";
-			break;
-		case 'U':
-			T << "User control.  ";
-			break;
-		case 'I':
-			T << "Insert zero/pole.  ";
-			break;
-		default:
-			break;
-	};
-	
-	if(G.labels_on){
-		T << "Labels are on.";
-	};
-		
-	p.x=30;
-	p.y=660;
-	draw_text(p,T,0x000000);
-	T.str("");
-	
-	XFlush(display);
-};

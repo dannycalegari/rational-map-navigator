@@ -47,7 +47,7 @@ void setup_graphics(void){
 	height = 700;
 	win = XCreateSimpleWindow(display, RootWindow(display, screen_num), 0, 0, width, 
 		height, border_width, BlackPixel(display, screen_num), WhitePixel(display, screen_num));
-	XSelectInput(display, win, ExposureMask | KeyPressMask | ButtonPressMask);
+	XSelectInput(display, win, ExposureMask | KeyPressMask | ButtonPressMask | PointerMotionMask);
 	gc = DefaultGC(display, screen_num);
 	XSetForeground(display, gc, BlackPixel(display, screen_num));
 	XSetBackground(display, gc, WhitePixel(display, screen_num));
@@ -92,6 +92,13 @@ void draw_faint_line(point p1, point p2, long col){
     XDrawLine(display, win, gc, p1.x, p1.y, p2.x, p2.y);
 };
 
+void erase_circle(point p, int r){
+	XSetForeground(display, gc, 0xFFFFFF);
+    XSetLineAttributes(display, gc, 1, LineOnOffDash, 1, 1);
+	XSetFillStyle(display, gc, FillSolid);
+    XFillArc(display, win, gc, p.x-r, p.y-r, 2*r, 2*r, 0, 23040);
+};
+
 void draw_circle(point p, int r, long col){
     XSetForeground(display, gc, col);
     XSetLineAttributes(display, gc, 1, LineSolid, 1, 1);
@@ -101,7 +108,7 @@ void draw_circle(point p, int r, long col){
 
 void draw_concentric_circles(point p, int r, long col){
 	int s;
-    for(s=1;s<4;s++){
+    for(s=3;s>0;s--){
 	    XSetForeground(display, gc, col*s);
     	XSetLineAttributes(display, gc, 1, LineSolid, 1, 1);
     	XSetFillStyle(display, gc, FillSolid);

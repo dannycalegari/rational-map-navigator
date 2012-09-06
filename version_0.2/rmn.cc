@@ -54,15 +54,31 @@ cpx I (0.0,1.0);
 #include "polynomial.cc";
 #include "roots.cc";
 #include "rational_map.cc";
+#include "draw.cc"
+#include "insert.cc";
+#include "magnify.cc";
+#include "read_write.cc";
 #include "user_interface.cc";
 
 // #include "benchmark.cc";
 // #include "partial_fraction.cc";
 
 int main(int argc, char *argv[]){ 
+	rational_map R;
+	ifstream input_file;
+	
 	setup_graphics();
-	benchmark_test();
-	while(1){
+
+	if(argc>1){
+		input_file.open(argv[1]);
+		R.read_from_file(input_file);
+	} else {
+		R.initialize();
 	};
+	while(1){
+		R.draw_state();
+		R.user_interface();
+	};
+	
 	return(0);
 };
