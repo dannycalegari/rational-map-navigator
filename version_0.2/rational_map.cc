@@ -42,6 +42,7 @@ class rational_map{
 		
 		void jiggle(cvec);		// try to perturb z/p to move towards specific value
 		void flow_VALS_to(cvec, double);	// flow VALS in straight line to specific value
+		void do_braid(braid);
 		void draw_state();
 		void read_from_file(ifstream &);		// read data from file
 		void write_to_file(ofstream &);		// write data to file

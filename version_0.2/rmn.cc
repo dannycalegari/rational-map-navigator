@@ -48,13 +48,14 @@ using namespace std;
 
 cpx I (0.0,1.0);
 
-#include "points.cc"
+#include "braid.cc";
+#include "points.cc";
 #include "vector.cc";
 #include "graphics.cc"
 #include "polynomial.cc";
 #include "roots.cc";
 #include "rational_map.cc";
-#include "draw.cc"
+#include "draw.cc";
 #include "insert.cc";
 #include "magnify.cc";
 #include "read_write.cc";
