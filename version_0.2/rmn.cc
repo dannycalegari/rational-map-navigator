@@ -60,6 +60,7 @@ cpx I (0.0,1.0);
 #include "magnify.cc";
 #include "read_write.cc";
 #include "user_interface.cc";
+#include "select.cc";
 
 // #include "benchmark.cc";
 // #include "partial_fraction.cc";

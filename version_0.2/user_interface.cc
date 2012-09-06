@@ -69,6 +69,13 @@ void rational_map::user_interface(){
 					output_file.close();
 					break;
 				};
+				if(XLookupKeysym(&report.xkey, 0) == XK_s){	// select and adjust point
+					G.doing='S';
+					select_and_adjust();
+					G.doing='U';
+					draw_state();
+					break;
+				};
 				if(XLookupKeysym(&report.xkey, 0) == XK_b){	// do braid
 					b.i=2;
 					b.j=-5;

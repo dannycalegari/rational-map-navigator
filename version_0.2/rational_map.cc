@@ -10,6 +10,9 @@ struct graphics_state{	// stuff we need to know for graphics
 	cpx insert_point;	// center of zero/pole pair
 	cpx zero_point;	// zero of zero/pole pair
 	point magnify_location;	// location of magnifying glass
+	char select_type;	// one of 'Z', 'P', 'V' (zero/pole/vals) or 'N' (none)
+	int select_index;
+	cpx select_location;
 };
 
 class rational_map{
@@ -40,7 +43,6 @@ class rational_map{
 		cvec DE(cvec);		// vector of values of R(W[i])
 		cmat JAC();			// dV/d{M,Z,P}
 		
-		void jiggle(cvec);		// try to perturb z/p to move towards specific value
 		void flow_VALS_to(cvec, double);	// flow VALS in straight line to specific value
 		void do_braid(braid);
 		void draw_state();
@@ -49,6 +51,7 @@ class rational_map{
 		void user_interface();			// top-level user interaction routine
 		void insert_zp();			// insert zero/pole pair
 		void magnify();				// magnifying glass
+		void select_and_adjust();	// select and adjust location of Z/P/V
 };
 
 void rational_map::initialize(){
@@ -191,10 +194,6 @@ cmat rational_map::JAC(){		// dV/d{Z,P}
 	};
 	
 	return(JAC);
-};
-
-void rational_map::jiggle(cvec V){	// try to perturb Z/P to move towards V
-
 };
 
 void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straight line to V

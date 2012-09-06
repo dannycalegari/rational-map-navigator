@@ -101,24 +101,32 @@ void rational_map::draw_state(){
 				draw_label(p,i,0x550055);
 			};
 		};
+		if(G.doing=='S'){
+			if(G.select_type=='Z' && G.select_index>-1){
+				p=cpx_to_point(ZERO[G.select_index]);
+				draw_circle(p,8,0x000000);
+			};
+			if(G.select_type=='P' && G.select_index>-1){
+				p=cpx_to_point(POLE[G.select_index]);
+				draw_circle(p,8,0x000000);			
+			};
+			if(G.select_type=='V' && G.select_index>-1){
+				p=cpx_to_point(VALS[G.select_index]);
+				p.x=p.x+620;
+				draw_circle(p,8,0x000000);			
+			};
+		};
 		
 	// write state
 	
 		T << "Degree " << deg(P) << ".  ";
-		T << "Type [h] for help screen.  ";
-		
-		if(G.labels_on){
-			T << "Labels are on.  ";
-		} else {
-			T << "Labels are off.  ";
-		};
 			
 		switch(G.doing){
 			case 'F':
 				T << "Flowing critical values to roots of unity. Distance is " << G.distance << ".  ";
 				break;
 			case 'U':
-				T << "User control.  ";
+				T << "User mode.  Type [h] for help screen.  ";
 				break;
 			case 'I':
 				T << "Insert zero/pole. Use mouse to pick location.  ";
@@ -127,7 +135,11 @@ void rational_map::draw_state(){
 				T << "Magnifying glass. Move mouse over location to magnify.  ";
 				break;
 			case 'S':
-				T << "Select Z/P/V. Use mouse to select and move point.  ";
+				if(G.select_index==-1){	
+					T << "Select  " << G.select_type << ".  Press [s] to cycle Z/P/V or [escape] to return to User mode.  Use mouse to select point.  ";
+				} else {
+					T << G.select_type << "[" << G.select_index << "] selected. Use arrow keys to move point. Click mouse to deselect. Current location is " << G.select_location.real() << "+" << G.select_location.imag() << "i. ";
+				};
 			default:
 				break;
 		};

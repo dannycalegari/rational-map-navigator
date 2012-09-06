@@ -112,7 +112,7 @@ void draw_concentric_circles(point p, int r, long col){
 	    XSetForeground(display, gc, col*s);
     	XSetLineAttributes(display, gc, 1, LineSolid, 1, 1);
     	XSetFillStyle(display, gc, FillSolid);
-	    XDrawArc(display, win, gc, p.x-r*s-1, p.y-r*s-1, 2*r*s-2, 2*r*s-2, 0, 23040);
+	    XDrawArc(display, win, gc, p.x-r*s+1, p.y-r*s+1, 2*r*s-2, 2*r*s-2, 0, 23040);
 	};
 };
 
