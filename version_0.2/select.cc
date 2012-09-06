@@ -74,7 +74,11 @@ void rational_map::select_and_adjust(){		// select and adjust location of Z/P/V
 					switch(G.select_type){
 						case 'Z':
 							G.select_index=closest_match(u, ZERO);
-							G.select_location=ZERO[G.select_index];
+							if(G.select_index==0){	// can't adjust ZERO[0] which is fixed at 0.
+								G.select_index=-1;
+							} else {
+								G.select_location=ZERO[G.select_index];
+							};
 							break;
 						case 'P':
 							G.select_index=closest_match(u, POLE);
