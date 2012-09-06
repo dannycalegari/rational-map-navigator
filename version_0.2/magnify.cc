@@ -24,6 +24,5 @@ void rational_map::magnify(){		// magnifying glass
 			default:
 				break;
 		};
-
 	};
 };
