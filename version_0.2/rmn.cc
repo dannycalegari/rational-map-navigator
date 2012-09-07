@@ -2,7 +2,7 @@
 
 	Rational Map Navigator version 0.02
 
-	September 1 2012
+	September 7 2012
 
 	Copyright Danny Calegari
 

@@ -56,6 +56,7 @@ class rational_map{
 
 void rational_map::initialize(){
 	ZERO.resize(0);
+	ZERO.push_back(0.0);	// first zero is fixed at 0
 	POLE.resize(0);
 	M=1.0;
 	CRIT.resize(0);
