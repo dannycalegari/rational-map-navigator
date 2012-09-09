@@ -41,7 +41,8 @@ class rational_map{
 		cvec E(cvec);		// vector of values of R(W[i])
 		cpx DE(cpx);		// value of DR(w)
 		cvec DE(cvec);		// vector of values of R(W[i])
-		cmat JAC();			// dV/d{M,Z,P}
+		cmat CRIT_JAC();		// dC/d{M,Z,P}
+		cmat VALS_JAC();			// dV/d{M,Z,P}
 		
 		void flow_VALS_to(cvec, double);	// flow VALS in straight line to specific value
 		void do_braid(braid);
@@ -153,7 +154,39 @@ cvec rational_map::DE(cvec W){
 	return(V);
 };
 
-cmat rational_map::JAC(){		// dV/d{Z,P}
+cmat rational_map::CRIT_JAC(){		// dC/d{Z,P}
+	/* This function computes the Jacobian matrix dCRIT/d{ZERO,POLE}
+	
+	For each zero z_i this is PQR/W'(c-z_i)^2 
+        
+    For each pole p_i this is -PQR'/W'(c-p_i)^2.   */
+
+    int i,j;
+    cpx w,u,v,c;
+    cvec ROW;
+    cmat JAC;
+    JAC.resize(0);
+    
+	for(i=0;i<(int) CRIT.size();i++){	// for each critical point
+		ROW.resize(0);
+//		ROW.push_back(0);	// derivative wrt M
+    	u=DDEVAL(P,CRIT[i])*EVAL(Q,CRIT[i])-EVAL(P,CRIT[i])*DDEVAL(Q,CRIT[i]);	// D(W)(CRIT[i]);
+    	v=EVAL(P,CRIT[i])*EVAL(Q,CRIT[i])/u;
+		for(j=1;j<(int) ZERO.size();j++){	// first ZERO is fixed at 0
+			w=v/((CRIT[i]-ZERO[j])*(CRIT[i]-ZERO[j]));
+            ROW.push_back(-w);		
+		};
+		for(j=0;j<(int) POLE.size();j++){	// ``-1th'' POLE is infinity (omitted)
+   			w=v/((CRIT[i]-POLE[j])*(CRIT[i]-POLE[j]));
+            ROW.push_back(w);			
+		};
+		JAC.push_back(ROW);
+	};
+	
+	return(JAC);
+};
+
+cmat rational_map::VALS_JAC(){		// dV/d{Z,P}
 	/* This function computes the Jacobian matrix dVALS/d{ZERO,POLE}
 	
 	For each zero z_i define R(z,l):=R(z-l)/(z-z_i) 
@@ -198,8 +231,8 @@ cmat rational_map::JAC(){		// dV/d{Z,P}
 };
 
 void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straight line to V
-	cvec K,L,VV;
-	cmat J;
+	cvec K,LC,L,VV,CC;
+	cmat J,JC;
 	double SPEED;
 	int i,j;
 		
@@ -209,8 +242,10 @@ void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straig
 		if(j%10==1){
 			draw_state();
 		};
-		J=JAC();	// this is the Jacobian
+		J=VALS_JAC();		// dV/d{Z,P}
+		JC=CRIT_JAC();	// dC/d{Z,P}
 		K=INV(J,L);		// J*K=L
+		LC=JC*K;		// how critical points move
 		SPEED=0.01/sqrt(norm(L));
 		if(SPEED>0.1){
 			SPEED=0.1;
@@ -226,6 +261,9 @@ void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straig
 			POLE[i]=POLE[i]+K[i-1+(int) ZERO.size()]*SPEED;
 		};
 		compute_P_and_Q();
+		CRIT=CRIT+(LC*SPEED);	// estimate move first
+
+		VALS=VALS+(L*SPEED);
 		compute_critical_points(0.000000000000000001);
 		compute_critical_values();
 //		normalize();
@@ -239,17 +277,22 @@ void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straig
 			vwrite(V);
 			assert(1==0);
 		};
-		if(norm(VALS)>1000000){	// something's wrong here
-			cout << "norm blow up! Jacobian J is ";
-			J=JAC();	// this is the Jacobian
+		if(norm(VALS)>100000){	// something's wrong here
+			cout << "norm blow up! dV/d{Z,P} is ";
+			J=VALS_JAC();	// this is the Jacobian
 			mwrite(J);
-			cout << "direction L we want to move is ";
-			vwrite(L);
+			cout << "dC/d{Z,P} is ";
+			JC=CRIT_JAC();
+			mwrite(JC);
 			K=INV(J,L);		// J*K=L
+			LC=JC*K;		// how critical points move
+			cout << "LC = ";
+			vwrite(LC);
 			cout << "inverting JAC gives K ";
 			vwrite(K);
 			cout << "J*K = ";
 			vwrite(J*K);
+			CC=CRIT;
 			VV=VALS;
 			SPEED=SPEED/100000.0;
 			for(i=1;i<(int) ZERO.size();i++){
@@ -263,7 +306,12 @@ void rational_map::flow_VALS_to(cvec V, double accuracy){	// flow VALS in straig
 			compute_critical_values();
 			cout << "actual direction of motion is ";
 			vwrite((VALS-VV)*(1.0/SPEED));
-			
+			cout << "direction L we want to move is ";
+			vwrite(L);
+			cout << "critical direction of motion is ";
+			vwrite((CRIT-CC)*(1.0/SPEED));
+			cout << "theoretical direction is ";
+			vwrite(LC);
 			cout << "sanity check. \n";
 			cout << "VALS ";
 			vwrite(VALS);
